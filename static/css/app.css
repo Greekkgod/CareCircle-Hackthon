@@ -1,7 +1,10 @@
 /**
  * CareCircle Accessible Elderly Styling System
  * WCAG AAA compliance, 20px+ base font, 56px+ touch targets, high contrast.
+ * Integrated with ui-ux-pro-max design system & Quire SaaS 3-column architecture.
  */
+
+@import url('https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&family=Fira+Code:wght@500;600;700&family=Noto+Sans:wght@400;500;700&display=swap');
 
 :root {
   --font-base: 22px;
@@ -24,6 +27,28 @@
   --border-radius: 16px;
   --focus-ring: 4px solid #60A5FA;
   --min-touch-target: 56px;
+
+  /* Modern Clinical SaaS Palette (Quire-inspired & ui-ux-pro-max) */
+  --canvas-saas: #F8FAFC;
+  --surface-saas: #FFFFFF;
+  --surface-subtle: #F1F5F9;
+  --border-saas: #E2E8F0;
+  --border-saas-hover: #CBD5E1;
+  --text-saas-main: #0F172A;
+  --text-saas-sub: #475569;
+  --text-saas-dim: #94A3B8;
+  --accent-quire: #EA580C;
+  --accent-quire-light: #FFEDD5;
+  --primary-saas: #0284C7;
+  --primary-saas-light: #E0F2FE;
+  --success-saas: #16A34A;
+  --success-saas-light: #DCFCE7;
+  --warning-saas: #D97706;
+  --warning-saas-light: #FEF3C7;
+  --emergency-saas: #DC2626;
+  --emergency-saas-light: #FEE2E2;
+  --shadow-card: 0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px 0 rgba(0, 0, 0, 0.03);
+  --shadow-hover: 0 4px 6px -1px rgba(0, 0, 0, 0.08), 0 2px 4px -2px rgba(0, 0, 0, 0.04);
 }
 
 /* Dynamic Senior Font Scaling */
@@ -49,6 +74,25 @@ html[data-theme="high-contrast"] {
   --color-warning: #FACC15;
   --color-warning-hover: #EAB308;
 
+  --canvas-saas: #000000;
+  --surface-saas: #000000;
+  --surface-subtle: #18181B;
+  --border-saas: #FACC15;
+  --border-saas-hover: #FFFFFF;
+  --text-saas-main: #FFFFFF;
+  --text-saas-sub: #FEF08A;
+  --text-saas-dim: #FDE047;
+  --accent-quire: #FACC15;
+  --accent-quire-light: #78350F;
+  --primary-saas: #FACC15;
+  --primary-saas-light: #18181B;
+  --success-saas: #22C55E;
+  --success-saas-light: #064E3B;
+  --warning-saas: #FACC15;
+  --warning-saas-light: #78350F;
+  --emergency-saas: #EF4444;
+  --emergency-saas-light: #7F1D1D;
+
   --focus-ring: 4px solid #FACC15;
 }
 
@@ -57,9 +101,19 @@ html[data-theme="high-contrast"] .hero-dose-card,
 html[data-theme="high-contrast"] .sos-card,
 html[data-theme="high-contrast"] .greeting-banner,
 html[data-theme="high-contrast"] .stat-item,
-html[data-theme="high-contrast"] .med-card {
+html[data-theme="high-contrast"] .med-card,
+html[data-theme="high-contrast"] .kpi-card-quire,
+html[data-theme="high-contrast"] .quire-sidebar,
+html[data-theme="high-contrast"] .quire-copilot,
+html[data-theme="high-contrast"] .chart-card-quire,
+html[data-theme="high-contrast"] .breakdown-card-quire,
+html[data-theme="high-contrast"] .reconcile-card-quire,
+html[data-theme="high-contrast"] .reconcile-row,
+html[data-theme="high-contrast"] .copilot-bubble.bot,
+html[data-theme="high-contrast"] .quire-top-bar {
   border: 3px solid #FACC15 !important;
   background: #000000 !important;
+  color: #FFFFFF !important;
 }
 
 html[data-theme="high-contrast"] .btn-huge-take {
@@ -87,7 +141,7 @@ html[data-theme="high-contrast"] .bottom-nav-item.active {
 
 html {
   font-size: var(--font-base);
-  font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-family: "Figtree", "Noto Sans", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   line-height: 1.6;
   background-color: var(--bg-primary);
   color: var(--text-primary);
@@ -1020,6 +1074,784 @@ footer.app-footer {
   text-align: center;
   font-size: 18px;
   color: var(--text-muted);
+}
+
+/* ==========================================================================
+   Quire-Inspired 3-Column Modern Clinical SaaS Architecture (Caretaker View)
+   ========================================================================== */
+
+.quire-layout {
+  display: grid;
+  grid-template-columns: 260px minmax(0, 1fr) 360px;
+  gap: 24px;
+  align-items: start;
+  max-width: 1600px;
+  margin: 0 auto;
+  padding: 16px 20px;
+  background-color: var(--canvas-saas);
+  border-radius: 20px;
+  color: var(--text-saas-main);
+}
+
+@media (max-width: 1320px) {
+  .quire-layout {
+    grid-template-columns: 240px minmax(0, 1fr);
+  }
+  .quire-copilot {
+    grid-column: 1 / -1;
+    position: static !important;
+  }
+}
+
+@media (max-width: 960px) {
+  .quire-layout {
+    grid-template-columns: 1fr;
+    padding: 12px;
+    gap: 16px;
+  }
+}
+
+/* 1. Left Care Context Sidebar */
+.quire-sidebar {
+  background: var(--surface-saas);
+  border: 1px solid var(--border-saas);
+  border-radius: 16px;
+  padding: 18px;
+  box-shadow: var(--shadow-card);
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.patient-profile-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--border-saas);
+}
+.patient-avatar-wrap {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  background: #E0F2FE;
+  color: #0369A1;
+  font-size: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+}
+.patient-meta-name {
+  font-size: 19px;
+  font-weight: 700;
+  color: var(--text-saas-main);
+  line-height: 1.2;
+}
+.patient-meta-sub {
+  font-size: 14px;
+  color: var(--text-saas-sub);
+  margin-top: 2px;
+}
+
+.quire-nav-group-title {
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-saas-dim);
+  margin-bottom: 8px;
+}
+.quire-nav-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.quire-nav-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  border-radius: 10px;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-saas-sub);
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 150ms ease;
+  border: 1px solid transparent;
+}
+.quire-nav-item:hover {
+  background: var(--surface-subtle);
+  color: var(--text-saas-main);
+}
+.quire-nav-item.active {
+  background: #F1F5F9;
+  color: var(--text-saas-main);
+  font-weight: 700;
+  border-color: #E2E8F0;
+}
+.quire-nav-badge {
+  font-size: 12px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 9999px;
+  background: var(--accent-quire-light);
+  color: var(--accent-quire);
+}
+
+.quire-progress-card {
+  background: #F8FAFC;
+  border: 1px solid var(--border-saas);
+  border-radius: 12px;
+  padding: 14px;
+}
+.quire-progress-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-saas-main);
+  margin-bottom: 6px;
+}
+.quire-progress-bar-track {
+  width: 100%;
+  height: 8px;
+  background: #E2E8F0;
+  border-radius: 9999px;
+  overflow: hidden;
+}
+.quire-progress-bar-fill {
+  height: 100%;
+  background: var(--success-saas);
+  border-radius: 9999px;
+  transition: width 300ms ease;
+}
+
+.quire-user-footer {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border-saas);
+}
+.quire-user-avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: #FEF3C7;
+  color: #B45309;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 16px;
+}
+.quire-user-name {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-saas-main);
+}
+.quire-user-role {
+  font-size: 13px;
+  color: var(--text-saas-dim);
+}
+
+/* 2. Center Stage: Command Center */
+.quire-main {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  min-width: 0;
+}
+
+/* Top Action & Search Bar */
+.quire-top-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  background: var(--surface-saas);
+  border: 1px solid var(--border-saas);
+  border-radius: 14px;
+  padding: 10px 18px;
+  box-shadow: var(--shadow-card);
+  flex-wrap: wrap;
+}
+.quire-search-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  min-width: 200px;
+}
+.quire-search-input {
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: 16px;
+  color: var(--text-saas-main);
+  width: 100%;
+  padding: 6px 0;
+}
+.quire-search-input::placeholder {
+  color: var(--text-saas-dim);
+}
+.quire-top-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.quire-action-pill-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: 9999px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid var(--border-saas);
+  background: var(--surface-saas);
+  color: var(--text-saas-main);
+  transition: all 150ms ease;
+  min-height: 40px;
+}
+.quire-action-pill-btn:hover {
+  background: var(--surface-subtle);
+  border-color: var(--border-saas-hover);
+}
+.quire-action-pill-btn.primary {
+  background: #000000;
+  color: #FFFFFF;
+  border-color: #000000;
+}
+.quire-action-pill-btn.primary:hover {
+  background: #27272A;
+}
+
+/* Greeting & Period Filter */
+.quire-greeting-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.quire-greeting-title {
+  font-size: 30px;
+  font-weight: 800;
+  color: var(--text-saas-main);
+  letter-spacing: -0.02em;
+  margin: 0;
+}
+.quire-greeting-sub {
+  font-size: 15px;
+  color: var(--text-saas-sub);
+  margin-top: 4px;
+}
+.quire-period-switcher {
+  display: inline-flex;
+  background: #F1F5F9;
+  padding: 4px;
+  border-radius: 12px;
+  gap: 4px;
+}
+.quire-period-btn {
+  border: none;
+  background: transparent;
+  padding: 6px 14px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-saas-sub);
+  cursor: pointer;
+  transition: all 150ms ease;
+}
+.quire-period-btn.active {
+  background: #FFFFFF;
+  color: var(--text-saas-main);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+/* 4-KPI Metric Cards Grid */
+.quire-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+@media (max-width: 1100px) {
+  .quire-kpi-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+@media (max-width: 580px) {
+  .quire-kpi-grid {
+    grid-template-columns: 1fr;
+  }
+}
+.quire-kpi-card {
+  background: var(--surface-saas);
+  border: 1px solid var(--border-saas);
+  border-radius: 16px;
+  padding: 18px 20px;
+  box-shadow: var(--shadow-card);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: transform 150ms ease, box-shadow 150ms ease;
+}
+.quire-kpi-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-hover);
+  border-color: var(--border-saas-hover);
+}
+.quire-kpi-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-saas-sub);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.quire-kpi-value {
+  font-family: "Fira Code", monospace;
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--text-saas-main);
+  margin: 10px 0 6px 0;
+  letter-spacing: -0.02em;
+}
+.quire-kpi-bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.quire-kpi-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 13px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 9999px;
+}
+.quire-kpi-badge.positive {
+  background: var(--success-saas-light);
+  color: #166534;
+}
+.quire-kpi-badge.warning {
+  background: var(--warning-saas-light);
+  color: #92400E;
+}
+.quire-kpi-badge.neutral {
+  background: #F1F5F9;
+  color: #475569;
+}
+.quire-sparkline-wrap {
+  display: flex;
+  align-items: flex-end;
+  gap: 3px;
+  height: 20px;
+}
+.quire-spark-bar {
+  width: 4px;
+  background: #E2E8F0;
+  border-radius: 2px;
+}
+.quire-spark-bar.active {
+  background: var(--accent-quire);
+}
+
+/* Middle Analytics Row: 2 Cards Side-by-Side */
+.quire-analytics-grid {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr;
+  gap: 16px;
+}
+@media (max-width: 960px) {
+  .quire-analytics-grid {
+    grid-template-columns: 1fr;
+  }
+}
+.chart-card-quire,
+.breakdown-card-quire {
+  background: var(--surface-saas);
+  border: 1px solid var(--border-saas);
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: var(--shadow-card);
+}
+.chart-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.chart-card-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-saas-main);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.chart-legend {
+  display: flex;
+  gap: 12px;
+  font-size: 13px;
+  color: var(--text-saas-sub);
+}
+.legend-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+  margin-right: 4px;
+}
+
+/* 7-Day Adherence Interactive Bar Chart */
+.chart-bar-container {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  height: 180px;
+  padding-top: 24px;
+  position: relative;
+  border-bottom: 1px solid var(--border-saas);
+}
+.chart-bar-column {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+  position: relative;
+  cursor: pointer;
+}
+.chart-bar-pair {
+  display: flex;
+  align-items: flex-end;
+  gap: 4px;
+  height: 140px;
+}
+.chart-bar-seg {
+  width: 14px;
+  border-radius: 4px 4px 0 0;
+  transition: transform 150ms ease, opacity 150ms ease;
+}
+.chart-bar-column:hover .chart-bar-seg {
+  opacity: 0.85;
+  transform: scaleY(1.04);
+}
+.chart-day-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-saas-sub);
+  margin-top: 8px;
+}
+
+/* Floating Chart Hover Tooltip */
+.chart-hover-popover {
+  position: absolute;
+  top: -12px;
+  background: #FFFFFF;
+  border: 1px solid var(--border-saas);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
+  padding: 8px 12px;
+  font-size: 13px;
+  pointer-events: none;
+  z-index: 100;
+  min-width: 140px;
+  display: none;
+}
+.chart-bar-column:hover .chart-hover-popover,
+.chart-bar-column:focus .chart-hover-popover {
+  display: block;
+}
+
+/* Horizontal Time-of-Day Dose Breakdown */
+.breakdown-row {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 14px;
+}
+.breakdown-label-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-saas-main);
+}
+.breakdown-track {
+  width: 100%;
+  height: 10px;
+  background: #F1F5F9;
+  border-radius: 9999px;
+  overflow: hidden;
+}
+.breakdown-fill {
+  height: 100%;
+  border-radius: 9999px;
+  transition: width 300ms ease;
+}
+
+/* 3. Reconciliation Table (Quire "Receipts to match") */
+.reconcile-card-quire {
+  background: var(--surface-saas);
+  border: 1px solid var(--border-saas);
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: var(--shadow-card);
+}
+.reconcile-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.reconcile-table-wrap {
+  width: 100%;
+  overflow-x: auto;
+}
+.reconcile-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+.reconcile-table th {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-saas-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border-saas);
+}
+.reconcile-table td {
+  padding: 14px;
+  font-size: 15px;
+  color: var(--text-saas-main);
+  border-bottom: 1px solid var(--border-saas);
+  vertical-align: middle;
+}
+.reconcile-row:hover {
+  background: #F8FAFC;
+}
+.certainty-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 9999px;
+}
+.certainty-pill.clean {
+  background: var(--success-saas-light);
+  color: #166534;
+}
+.certainty-pill.ddi-ok {
+  background: #E0F2FE;
+  color: #0369A1;
+}
+.certainty-pill.caution {
+  background: var(--warning-saas-light);
+  color: #92400E;
+}
+
+/* 4. Column 3: CareCircle AI Copilot Panel */
+.quire-copilot {
+  background: var(--surface-saas);
+  border: 1px solid var(--border-saas);
+  border-radius: 16px;
+  padding: 18px;
+  box-shadow: var(--shadow-card);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  position: sticky;
+  top: 16px;
+  max-height: calc(100vh - 32px);
+  overflow-y: auto;
+}
+.copilot-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border-saas);
+}
+.copilot-title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--text-saas-main);
+}
+.copilot-beta-pill {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  background: #F1F5F9;
+  color: var(--text-saas-sub);
+  padding: 2px 6px;
+  border-radius: 6px;
+}
+.copilot-feed {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.copilot-bubble {
+  border-radius: 14px;
+  padding: 14px;
+  font-size: 15px;
+  line-height: 1.5;
+}
+.copilot-bubble.user {
+  background: #000000;
+  color: #FFFFFF;
+  align-self: flex-end;
+  max-width: 88%;
+}
+.copilot-bubble.bot {
+  background: #F8FAFC;
+  border: 1px solid var(--border-saas);
+  color: var(--text-saas-main);
+}
+.reasoning-step-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #EFF6FF;
+  border: 1px solid #BFDBFE;
+  color: #1E40AF;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 9999px;
+  margin-bottom: 8px;
+  cursor: pointer;
+}
+.copilot-metrics-mini {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin: 10px 0;
+}
+.copilot-metric-box {
+  background: #FFFFFF;
+  border: 1px solid var(--border-saas);
+  border-radius: 10px;
+  padding: 8px 10px;
+  text-align: center;
+}
+.copilot-metric-box-val {
+  font-family: "Fira Code", monospace;
+  font-weight: 700;
+  font-size: 18px;
+  color: var(--text-saas-main);
+}
+.copilot-metric-box-lbl {
+  font-size: 12px;
+  color: var(--text-saas-dim);
+}
+.copilot-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+}
+.copilot-action-btn {
+  flex: 1;
+  background: #000000;
+  color: #FFFFFF;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 150ms ease;
+}
+.copilot-action-btn:hover {
+  opacity: 0.9;
+}
+.copilot-suggestions {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 6px;
+}
+.copilot-suggestion-title {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--text-saas-dim);
+  letter-spacing: 0.04em;
+}
+.copilot-prompt-pill {
+  background: #FFFFFF;
+  border: 1px solid var(--border-saas);
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-saas-sub);
+  cursor: pointer;
+  text-align: left;
+  transition: all 150ms ease;
+}
+.copilot-prompt-pill:hover {
+  background: var(--surface-subtle);
+  color: var(--text-saas-main);
+  border-color: var(--border-saas-hover);
+}
+.copilot-input-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #FFFFFF;
+  border: 1px solid var(--border-saas);
+  border-radius: 12px;
+  padding: 6px 10px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+.copilot-input-box input {
+  flex: 1;
+  border: none;
+  outline: none;
+  font-size: 14px;
+  color: var(--text-saas-main);
+  background: transparent;
+  padding: 6px 0;
+}
+.copilot-send-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  border: none;
+  background: #000000;
+  color: #FFFFFF;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 700;
+}
+.copilot-send-btn:hover {
+  background: #27272A;
 }
 
 /* Reduced Motion Mode */
