@@ -1,13 +1,13 @@
-"""ChangeRequest API routes implementing the elder-approval workflow."""
+"""ChangeRequest API routes implementing the plain-language elder-consent workflow."""
 
 from typing import Any, Dict, List, Optional
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel, Field
-from app.core.security import get_current_user, require_roles
+from app.core.security import require_roles
 from app.models.change_request import ChangeRequest, ChangeRequestCreate, ChangeRequestStatus
 from app.services import change_request_service
 
-router = APIRouter(prefix="/api/change-requests", tags=["Change Requests"])
+router = APIRouter(prefix="/api/change-requests", tags=["Change Requests & Consent"])
 
 
 class RejectPayload(BaseModel):
@@ -32,14 +32,17 @@ async def create_change_request_endpoint(
     payload: ChangeRequestCreate,
     current_user: Dict[str, str] = Depends(require_roles(["elder", "caretaker"])),
 ) -> ChangeRequest:
-    """Submit a proposed change request for elder confirmation."""
+    """Submit a proposed change request for elder confirmation with duplicate protection."""
     return change_request_service.create_change_request(
         elder_id=payload.elder_id,
         entity_type=payload.entity_type,
+        entity_id=payload.entity_id,
         proposed_changes=payload.proposed_changes,
         reason=payload.reason,
         created_by=current_user.get("name", current_user["sub"]),
+        plain_language_summary=payload.plain_language_summary,
         ai_generated=payload.ai_generated,
+        expires_in_hours=payload.expires_in_hours,
     )
 
 
@@ -51,6 +54,7 @@ async def approve_change_request_endpoint(
     """Approve a change request and apply mutations to the underlying entity.
 
     Strict Permission Matrix: Only the 'elder' role can approve change requests.
+    Validates against expiration.
     """
     cr, entity = change_request_service.approve_change_request(
         change_request_id=change_request_id,

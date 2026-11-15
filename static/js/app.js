@@ -160,6 +160,7 @@ const CareApp = (() => {
   async function loadDataForCurrentRole() {
     try {
       if (state.role === "elder") {
+        await loadElderConsentCards();
         await loadElderMeds();
         await loadElderAppts();
       } else if (state.role === "caretaker") {
@@ -169,6 +170,68 @@ const CareApp = (() => {
       }
     } catch (e) {
       console.error("Error loading role data", e);
+    }
+  }
+
+  /**
+   * Fetch and render plain-language consent cards for pending change requests.
+   */
+  async function loadElderConsentCards() {
+    const sec = document.getElementById("elder-consent-section");
+    const container = document.getElementById("elder-consent-container");
+    if (!sec || !container) return;
+
+    try {
+      const crs = await apiFetch("/api/change-requests/?status_filter=PENDING");
+      if (crs.length === 0) {
+        sec.style.display = "none";
+        return;
+      }
+      sec.style.display = "block";
+      container.innerHTML = crs.map((c) => `
+        <article class="card-box" style="background: #292524; border: 2px solid #F59E0B; margin-bottom: 12px; padding: 16px;">
+          <div style="font-size: 22px; font-weight: 700; color: #FFFFFF; line-height: 1.5;">
+            ${escapeHtml(c.plain_language_summary)}
+          </div>
+          <div style="font-size: 18px; color: #D6D3D1; margin-top: 8px;">
+            Proposed by: <strong>${escapeHtml(c.created_by)}</strong> | Expires in: ${new Date(c.expires_at).toLocaleDateString()}
+          </div>
+          <div style="display: flex; gap: 12px; margin-top: 16px; flex-wrap: wrap;">
+            <button class="btn-primary" style="background: #10B981; border-color: #6EE7B7; font-size: 22px; min-height: 56px;" onclick="CareApp.decideChangeRequest('${c.id}', true)">
+              ✅ I Agree (Update Plan)
+            </button>
+            <button class="btn-secondary" style="background: #44403C; border-color: #78716C; font-size: 20px; min-height: 56px;" onclick="CareApp.decideChangeRequest('${c.id}', false)">
+              ❌ I Decline (Keep Current Plan)
+            </button>
+          </div>
+        </article>
+      `).join("");
+    } catch (err) {
+      console.warn("Could not load consent cards", err);
+    }
+  }
+
+  /**
+   * Elder decision on a change request.
+   */
+  async function decideChangeRequest(changeRequestId, approve) {
+    try {
+      const endpoint = approve
+        ? `/api/change-requests/${changeRequestId}/approve`
+        : `/api/change-requests/${changeRequestId}/reject`;
+      await apiFetch(endpoint, { method: "POST" });
+      const msg = approve
+        ? "You agreed to the change! Your care plan has been updated."
+        : "You declined the change. Your current plan stays the same.";
+      announce(msg, "success");
+      if ("speechSynthesis" in window) {
+        window.speechSynthesis.speak(new SpeechSynthesisUtterance(msg));
+      }
+      await loadElderConsentCards();
+      await loadElderMeds();
+      await loadElderAppts();
+    } catch (err) {
+      announce(err.message, "alert");
     }
   }
 
@@ -640,6 +703,7 @@ const CareApp = (() => {
     resolveSOS,
     sendFamilyNote,
     loadSampleText,
+    decideChangeRequest,
   };
 })();
 
