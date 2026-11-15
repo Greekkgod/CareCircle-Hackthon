@@ -9,7 +9,7 @@
   
   <link rel="manifest" href="/manifest.webmanifest">
   <link rel="icon" href="/static/icons/icon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="/static/css/app.css?v=20261115-4">
+  <link rel="stylesheet" href="/static/css/app.css?v=20261115-5">
 </head>
 <body class="caretaker-active">
   <!-- Keyboard Accessible Skip Link -->
@@ -227,131 +227,200 @@
       <h1 id="caretaker-heading" class="sr-live-region">Caretaker Clinical Console</h1>
 
       <div class="quire-layout">
-        <!-- COLUMN 1: LEFT CARE CONTEXT SIDEBAR -->
-        <aside class="quire-sidebar" aria-label="Care Context & Navigation">
-          <!-- Patient Profile Card -->
-          <div class="patient-profile-card">
-            <div class="patient-avatar-wrap" aria-hidden="true">👵</div>
-            <div>
-              <div class="patient-meta-name">Rose Dawson</div>
-              <div class="patient-meta-sub">Age 82 · Cardiopulmonary</div>
-              <div style="margin-top: 4px;">
-                <span class="certainty-pill clean" style="font-size: 11px; padding: 2px 6px;">🟢 On Track</span>
+        <!-- COLUMN 1: LEFT QUIRE SIDEBAR -->
+        <aside class="quire-sidebar" id="quire-sidebar-col" aria-label="Navigation Sidebar">
+          <!-- Logo Header -->
+          <div class="quire-brand-header">
+            <span class="quire-logo-mark" aria-hidden="true"></span>
+            <span class="quire-logo-text">quire</span>
+          </div>
+
+          <!-- Organization Switcher Card -->
+          <div class="quire-org-card" id="quire-org-card">
+            <div class="quire-org-icon" id="org-avatar-box">O</div>
+            <div class="quire-org-details">
+              <div class="quire-org-name">
+                <span id="org-name-text">Orchard Lane Coffee</span>
+                <span class="quire-org-arrow" aria-hidden="true">⇅</span>
               </div>
+              <div class="quire-org-meta" id="org-meta-text">4 cafés · Books</div>
             </div>
           </div>
 
-          <!-- Navigation Groups -->
-          <nav aria-label="Clinical Navigation">
-            <div class="quire-nav-group-title">Clinical Overview</div>
-            <ul class="quire-nav-list">
+          <!-- Navigation Links -->
+          <nav aria-label="Main Navigation">
+            <ul class="quire-nav-items">
               <li>
-                <a href="#caretaker-top-section" class="quire-nav-item active">
-                  <span>📊 Dashboard</span>
-                  <span class="quire-nav-badge">Live</span>
+                <a href="#caretaker-top-section" class="quire-nav-link active" id="nav-item-home">
+                  <span class="quire-nav-icon" aria-hidden="true">⊞</span>
+                  <span class="quire-nav-label">Home</span>
                 </a>
               </li>
               <li>
-                <a href="#medication-reconciliation-section" class="quire-nav-item">
-                  <span>💊 Regimens &amp; Refills</span>
-                  <span style="font-size: 12px; color: var(--text-saas-dim);">4 Active</span>
+                <a href="#medication-reconciliation-section" class="quire-nav-link">
+                  <span class="quire-nav-icon" aria-hidden="true">🕭</span>
+                  <span class="quire-nav-label">Inbox</span>
+                  <span class="quire-inbox-badge" id="nav-inbox-badge">9</span>
                 </a>
               </li>
               <li>
-                <a href="#ai-scanner-section-quire" class="quire-nav-item">
-                  <span>🤖 AI Prescription Scanner</span>
-                  <span class="quire-nav-badge">AI</span>
+                <a href="#medication-reconciliation-section" class="quire-nav-link">
+                  <span class="quire-nav-icon" aria-hidden="true">⇄</span>
+                  <span class="quire-nav-label">Payments</span>
                 </a>
               </li>
               <li>
-                <a href="#manual-add-section-quire" class="quire-nav-item">
-                  <span>➕ Add Med / Visit</span>
+                <a href="#medication-reconciliation-section" class="quire-nav-link">
+                  <span class="quire-nav-icon" aria-hidden="true">▤</span>
+                  <span class="quire-nav-label">Receipts</span>
+                </a>
+              </li>
+              <li>
+                <a href="#caretaker-top-section" class="quire-nav-link">
+                  <span class="quire-nav-icon" aria-hidden="true">👥</span>
+                  <span class="quire-nav-label">Team pay</span>
+                </a>
+              </li>
+              <li>
+                <a href="#caretaker-top-section" class="quire-nav-link">
+                  <span class="quire-nav-icon" aria-hidden="true">🕮</span>
+                  <span class="quire-nav-label">Ledger</span>
                 </a>
               </li>
             </ul>
 
-            <div class="quire-nav-group-title" style="margin-top: 16px;">Safety &amp; Compliance</div>
-            <ul class="quire-nav-list">
+            <div class="quire-nav-section-title">Insights</div>
+            <ul class="quire-nav-items">
               <li>
-                <a href="#caretaker-weekly-adherence" class="quire-nav-item">
-                  <span>📈 7-Day Adherence Strip</span>
+                <a href="#quire-sales-costs-card" class="quire-nav-link">
+                  <span class="quire-nav-icon" aria-hidden="true">📈</span>
+                  <span class="quire-nav-label">Profit &amp; loss</span>
                 </a>
               </li>
               <li>
-                <a href="#escalation-simulator-section" class="quire-nav-item">
-                  <span>⏱️ Escalation Ladder</span>
+                <a href="#medication-reconciliation-section" class="quire-nav-link">
+                  <span class="quire-nav-icon" aria-hidden="true">🏛️</span>
+                  <span class="quire-nav-label">Bank matching</span>
+                </a>
+              </li>
+              <li>
+                <a href="#quire-kpi-grid-container" class="quire-nav-link">
+                  <span class="quire-nav-icon" aria-hidden="true">💳</span>
+                  <span class="quire-nav-label">Accounts</span>
+                </a>
+              </li>
+              <li>
+                <a href="#escalation-simulator-section" class="quire-nav-link">
+                  <span class="quire-nav-icon" aria-hidden="true">⚡</span>
+                  <span class="quire-nav-label">Automations</span>
+                </a>
+              </li>
+            </ul>
+
+            <div class="quire-nav-section-header">
+              <span class="quire-nav-section-title">Pinned reports</span>
+              <button type="button" class="quire-nav-add-btn" aria-label="Add report">+</button>
+            </div>
+            <ul class="quire-nav-items">
+              <li>
+                <a href="#carecircle-copilot" class="quire-nav-link">
+                  <span class="quire-dot orange" aria-hidden="true"></span>
+                  <span class="quire-nav-label">Café margins</span>
+                </a>
+              </li>
+              <li>
+                <a href="#quire-sales-costs-card" class="quire-nav-link">
+                  <span class="quire-dot green" aria-hidden="true"></span>
+                  <span class="quire-nav-label">Wholesale pipeline</span>
+                </a>
+              </li>
+              <li>
+                <a href="#medication-reconciliation-section" class="quire-nav-link">
+                  <span class="quire-dot orange" aria-hidden="true"></span>
+                  <span class="quire-nav-label">Tax prep 2026</span>
                 </a>
               </li>
             </ul>
           </nav>
 
-          <!-- Weekly Care Plan Progress Meter (Quire 64% close equivalent) -->
-          <div class="quire-progress-card">
-            <div class="quire-progress-top">
-              <span>Weekly Care Plan</span>
-              <span style="color: var(--success-saas); font-family: 'Fira Code', monospace;">94%</span>
+          <!-- September close progress widget -->
+          <div class="quire-close-card" id="quire-close-card">
+            <div class="quire-close-header">
+              <span class="quire-close-title" id="progress-card-title">September close</span>
+              <span class="quire-close-pct" id="progress-card-pct">64%</span>
             </div>
-            <div class="quire-progress-bar-track">
-              <div class="quire-progress-bar-fill" style="width: 94%;"></div>
+            <div class="quire-close-track">
+              <div class="quire-close-fill" id="progress-card-bar" style="width: 64%;"></div>
             </div>
-            <div style="font-size: 12px; color: var(--text-saas-dim); margin-top: 6px;">
-              16 of 17 doses logged on time
-            </div>
+            <div class="quire-close-sub" id="progress-card-sub">9 of 14 tasks · 6 days left</div>
           </div>
 
-          <!-- Caregiver User Drawer -->
-          <div class="quire-user-footer">
-            <div class="quire-user-avatar" aria-hidden="true">SJ</div>
-            <div style="flex: 1; min-width: 0;">
-              <div class="quire-user-name">Sarah Jenkins, RN</div>
-              <div class="quire-user-role">Lead Caregiver</div>
+          <!-- User profile footer -->
+          <div class="quire-user-footer" id="quire-user-footer">
+            <div class="quire-user-avatar">
+              <div class="quire-avatar-fallback" id="user-avatar-tag">MI</div>
             </div>
+            <div class="quire-user-info">
+              <div class="quire-user-name" id="user-display-name">Marco Ibe</div>
+              <div class="quire-user-title" id="user-display-role">Finance lead</div>
+            </div>
+            <button type="button" class="quire-user-settings" aria-label="User settings">🎛️</button>
           </div>
         </aside>
 
-        <!-- COLUMN 2: CENTER STAGE ANALYTICS & RECONCILIATION -->
+        <!-- COLUMN 2: CENTER MAIN STAGE -->
         <main class="quire-main" id="caretaker-top-section">
-          <!-- Top Action Bar with Search & Quick Actions -->
-          <div class="quire-top-bar">
-            <div class="quire-search-box">
-              <span aria-hidden="true" style="font-size: 16px;">🔍</span>
-              <input type="text" class="quire-search-input" placeholder="Search medications, doctor notes, appointments... (Press / to search)" aria-label="Search clinical records">
+          <!-- Top action bar -->
+          <div class="quire-center-top-bar">
+            <div class="quire-search-wrapper">
+              <span class="quire-search-icon" aria-hidden="true">🔍</span>
+              <input type="text" id="quire-main-search" class="quire-search-input" placeholder="Search vendors, bills, reports... [/]" aria-label="Search records">
+              <kbd class="quire-search-kbd">/</kbd>
             </div>
-            <div class="quire-top-actions">
-              <div style="display: flex; gap: 4px; background: #F1F3F5; border-radius: 9999px; padding: 3px; border: 1px solid #E5E7EB;">
-                <button type="button" id="btn-mode-carecircle" class="quire-action-pill-btn primary" style="min-height: 32px; padding: 4px 12px; font-size: 13px;" onclick="CareApp.switchQuireDataMode('carecircle')">
-                  🩺 CareCircle
-                </button>
-                <button type="button" id="btn-mode-quire" class="quire-action-pill-btn" style="min-height: 32px; padding: 4px 12px; font-size: 13px; border: none; background: transparent;" onclick="CareApp.switchQuireDataMode('quire')">
+
+            <div class="quire-center-actions">
+              <!-- Prominent 1-click Toggle Pill -->
+              <div class="quire-mode-toggle-group" role="tablist" aria-label="Dashboard Dataset Mode">
+                <button type="button" id="btn-mode-quire" class="quire-toggle-btn active" onclick="CareApp.switchQuireDataMode('quire')" aria-selected="true" role="tab">
                   ☕ Quire Live
                 </button>
+                <button type="button" id="btn-mode-carecircle" class="quire-toggle-btn" onclick="CareApp.switchQuireDataMode('carecircle')" aria-selected="false" role="tab">
+                  🩺 CareCircle
+                </button>
               </div>
-              <button type="button" class="quire-action-pill-btn" onclick="CareApp.generateDoctorBriefing()">
-                📋 Share Report
+
+              <button type="button" class="quire-btn-share" onclick="CareApp.generateDoctorBriefing()">
+                <span aria-hidden="true">↗</span> Share report
               </button>
-              <button type="button" class="quire-action-pill-btn primary" onclick="CareApp.refreshCaretakerData()">
-                🔒 Lock Period
+              <button type="button" class="quire-btn-lock" onclick="CareApp.refreshCaretakerData()">
+                <span aria-hidden="true">🔒</span> Lock September
+              </button>
+              <button type="button" class="quire-btn-bell" aria-label="Notifications">
+                <span>🔔</span>
+                <span class="quire-bell-dot"></span>
               </button>
             </div>
           </div>
 
-          <!-- Greeting Header & Period Switcher -->
-          <div class="quire-greeting-header">
+          <!-- Greeting Header -->
+          <div class="quire-greeting-row">
             <div>
-              <h2 class="quire-greeting-title">Good morning, Sarah</h2>
-              <div class="quire-greeting-sub">
-                📅 Nov 1 – Nov 15, 2026 · Real-time Firestore Sync
+              <h2 class="quire-greeting-h1" id="quire-heading-greeting">Good morning, Marco</h2>
+              <div class="quire-greeting-date" id="quire-date-subtitle">
+                <span id="quire-date-range">📅 Sep 1 – Sep 30, 2026</span>
+                <span class="quire-date-caret">▾</span>
+                <span class="quire-date-updated" id="quire-date-updated-text">· Updated just now</span>
               </div>
             </div>
-            <div class="quire-period-switcher" role="tablist" aria-label="Time period range">
-              <button type="button" class="quire-period-btn" onclick="CareApp.setPeriod('today')">Today</button>
-              <button type="button" class="quire-period-btn active" onclick="CareApp.setPeriod('7days')">7 Days</button>
-              <button type="button" class="quire-period-btn" onclick="CareApp.setPeriod('30days')">30 Days</button>
+            <div class="quire-period-segmented" role="tablist" aria-label="Period switcher">
+              <button type="button" class="quire-seg-btn active" id="seg-period-0" onclick="CareApp.setPeriod('september')">September</button>
+              <button type="button" class="quire-seg-btn" id="seg-period-1" onclick="CareApp.setPeriod('q3')">Q3</button>
+              <button type="button" class="quire-seg-btn" id="seg-period-2" onclick="CareApp.setPeriod('2026')">2026</button>
             </div>
           </div>
 
           <!-- Caretaker Live Status Banner (Required for test backward compatibility) -->
-          <aside id="caretaker-status-banner" class="caretaker-status-banner" role="status" aria-label="Elder Live Status">
+          <aside id="caretaker-status-banner" class="caretaker-status-banner" role="status" aria-label="Elder Live Status" style="display: none; margin-bottom: 16px;">
             <div>
               <div class="status-banner-title" id="caretaker-status-title">🟢 Rose Dawson is On Track</div>
               <div class="status-banner-desc" id="caretaker-status-desc">All scheduled morning doses recorded. Next scheduled dose: Metformin at 08:00.</div>
@@ -362,556 +431,663 @@
           </aside>
 
           <!-- 4-KPI Metric Cards Grid (Quire 4 metrics) -->
-          <div class="quire-kpi-grid">
-            <!-- 1. Adherence Rate -->
-            <div class="quire-kpi-card">
-              <div class="quire-kpi-label">
-                <span>Adherence Rate</span>
-                <span title="Doses taken within scheduled time window">ⓘ</span>
+          <div class="quire-kpi-row" id="quire-kpi-grid-container">
+            <!-- 1. Bank balance / Adherence -->
+            <div class="quire-kpi-box">
+              <div class="quire-kpi-top">
+                <span id="kpi-label-0">Bank balance</span>
+                <span class="quire-info-icon" title="View details">ⓘ</span>
               </div>
-              <div class="quire-kpi-value" id="caretaker-adherence-stat">96.2%</div>
-              <div class="quire-kpi-bottom">
-                <span class="quire-kpi-badge positive">+3.8% vs last wk</span>
-                <div class="quire-sparkline-wrap" aria-hidden="true">
-                  <div class="quire-spark-bar" style="height: 60%;"></div>
-                  <div class="quire-spark-bar" style="height: 75%;"></div>
-                  <div class="quire-spark-bar" style="height: 80%;"></div>
-                  <div class="quire-spark-bar" style="height: 70%;"></div>
-                  <div class="quire-spark-bar" style="height: 90%;"></div>
-                  <div class="quire-spark-bar" style="height: 95%;"></div>
-                  <div class="quire-spark-bar active" style="height: 100%;"></div>
-                </div>
-              </div>
-            </div>
-
-            <!-- 2. Doses Logged -->
-            <div class="quire-kpi-card">
-              <div class="quire-kpi-label">
-                <span>Scheduled Doses</span>
-                <span title="Total doses recorded across the care plan">ⓘ</span>
-              </div>
-              <div class="quire-kpi-value" id="caretaker-logged-stat">28 Doses</div>
-              <div class="quire-kpi-bottom">
-                <span class="quire-kpi-badge positive">100% On-time</span>
-                <div class="quire-sparkline-wrap" aria-hidden="true">
-                  <div class="quire-spark-bar" style="height: 70%;"></div>
-                  <div class="quire-spark-bar" style="height: 85%;"></div>
-                  <div class="quire-spark-bar" style="height: 80%;"></div>
-                  <div class="quire-spark-bar" style="height: 90%;"></div>
-                  <div class="quire-spark-bar active" style="height: 100%;"></div>
+              <div class="quire-kpi-num" id="caretaker-adherence-stat">$648,215<span class="quire-kpi-cents">.40</span></div>
+              <div class="quire-kpi-foot">
+                <span class="quire-badge-pct green" id="kpi-badge-0">+3.8% vs Aug</span>
+                <div class="quire-spark-bars" aria-hidden="true">
+                  <span style="height: 45%;"></span>
+                  <span style="height: 60%;"></span>
+                  <span style="height: 70%;"></span>
+                  <span style="height: 55%;"></span>
+                  <span style="height: 80%;"></span>
+                  <span style="height: 95%;"></span>
+                  <span style="height: 100%;" class="active"></span>
                 </div>
               </div>
             </div>
 
-            <!-- 3. Refills Watchlist -->
-            <div class="quire-kpi-card">
-              <div class="quire-kpi-label">
-                <span>Refills Needed</span>
-                <span title="Medications approaching threshold">ⓘ</span>
+            <!-- 2. Gross profit / Doses Logged -->
+            <div class="quire-kpi-box">
+              <div class="quire-kpi-top">
+                <span id="kpi-label-1">Gross profit</span>
+                <span class="quire-info-icon" title="View details">ⓘ</span>
               </div>
-              <div class="quire-kpi-value" id="caretaker-refills-stat">2 Low</div>
-              <div class="quire-kpi-bottom">
-                <span class="quire-kpi-badge warning">Order soon</span>
-                <div class="quire-sparkline-wrap" aria-hidden="true">
-                  <div class="quire-spark-bar" style="height: 100%;"></div>
-                  <div class="quire-spark-bar" style="height: 75%;"></div>
-                  <div class="quire-spark-bar" style="height: 50%;"></div>
-                  <div class="quire-spark-bar" style="height: 35%;"></div>
-                  <div class="quire-spark-bar active" style="height: 25%; background: var(--warning-saas);"></div>
-                </div>
-              </div>
-            </div>
-
-            <!-- 4. Escalations Status -->
-            <div class="quire-kpi-card">
-              <div class="quire-kpi-label">
-                <span>Escalation Alerts</span>
-                <span title="Active emergency and missed dose alerts">ⓘ</span>
-              </div>
-              <div class="quire-kpi-value" style="color: var(--success-saas);">0 Active</div>
-              <div class="quire-kpi-bottom">
-                <span class="quire-kpi-badge positive">All Clear</span>
-                <div class="quire-sparkline-wrap" aria-hidden="true">
-                  <div class="quire-spark-bar" style="height: 20%;"></div>
-                  <div class="quire-spark-bar" style="height: 0%;"></div>
-                  <div class="quire-spark-bar" style="height: 0%;"></div>
-                  <div class="quire-spark-bar" style="height: 0%;"></div>
-                  <div class="quire-spark-bar active" style="height: 0%;"></div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Middle Analytics Row: 7-Day Chart + Time-of-Day Breakdown -->
-          <div class="quire-analytics-grid">
-            <!-- 7-Day Adherence Interactive Bar Chart -->
-            <div class="chart-card-quire">
-              <div class="chart-card-header">
-                <div class="chart-card-title">
-                  <span>Adherence vs Timing</span>
-                  <div class="chart-legend">
-                    <span><span class="legend-dot" style="background: var(--accent-quire);"></span>On-Time</span>
-                    <span><span class="legend-dot" style="background: #FED7AA;"></span>Snoozed</span>
-                  </div>
-                </div>
-                <span style="font-size: 13px; color: var(--text-saas-dim); font-weight: 600;">Nov 9 – Nov 15</span>
-              </div>
-
-              <!-- Interactive Bar Chart Columns -->
-              <div class="chart-bar-container" id="quire-adherence-chart-bars">
-                <!-- Columns with accessible keyboard focus & hover tooltips -->
-                <div class="chart-bar-column" tabindex="0" aria-label="Monday: 4 doses on-time, 100% adherence">
-                  <div class="chart-hover-popover">
-                    <strong>Monday, Nov 9</strong><br>
-                    • 4/4 Doses On-Time<br>
-                    • Adherence: 100%
-                  </div>
-                  <div class="chart-bar-pair">
-                    <div class="chart-bar-seg" style="height: 110px; background: var(--accent-quire);"></div>
-                    <div class="chart-bar-seg" style="height: 10px; background: #FED7AA;"></div>
-                  </div>
-                  <span class="chart-day-label">Mon</span>
-                </div>
-
-                <div class="chart-bar-column" tabindex="0" aria-label="Tuesday: 3 doses on-time, 1 snoozed">
-                  <div class="chart-hover-popover">
-                    <strong>Tuesday, Nov 10</strong><br>
-                    • 3 On-Time, 1 Snoozed (15m)<br>
-                    • Adherence: 92%
-                  </div>
-                  <div class="chart-bar-pair">
-                    <div class="chart-bar-seg" style="height: 95px; background: var(--accent-quire);"></div>
-                    <div class="chart-bar-seg" style="height: 25px; background: #FED7AA;"></div>
-                  </div>
-                  <span class="chart-day-label">Tue</span>
-                </div>
-
-                <div class="chart-bar-column" tabindex="0" aria-label="Wednesday: 4 doses on-time, 100% adherence">
-                  <div class="chart-hover-popover">
-                    <strong>Wednesday, Nov 11</strong><br>
-                    • 4/4 Doses On-Time<br>
-                    • Adherence: 100%
-                  </div>
-                  <div class="chart-bar-pair">
-                    <div class="chart-bar-seg" style="height: 115px; background: var(--accent-quire);"></div>
-                    <div class="chart-bar-seg" style="height: 0; background: #FED7AA;"></div>
-                  </div>
-                  <span class="chart-day-label">Wed</span>
-                </div>
-
-                <div class="chart-bar-column" tabindex="0" aria-label="Thursday: 4 doses on-time, 100% adherence">
-                  <div class="chart-hover-popover">
-                    <strong>Thursday, Nov 12</strong><br>
-                    • 4/4 Doses On-Time<br>
-                    • Adherence: 100%
-                  </div>
-                  <div class="chart-bar-pair">
-                    <div class="chart-bar-seg" style="height: 118px; background: var(--accent-quire);"></div>
-                    <div class="chart-bar-seg" style="height: 0; background: #FED7AA;"></div>
-                  </div>
-                  <span class="chart-day-label">Thu</span>
-                </div>
-
-                <div class="chart-bar-column" tabindex="0" aria-label="Friday: 4 doses on-time, 100% adherence">
-                  <div class="chart-hover-popover">
-                    <strong>Friday, Nov 13</strong><br>
-                    • 4/4 Doses On-Time<br>
-                    • Adherence: 100%
-                  </div>
-                  <div class="chart-bar-pair">
-                    <div class="chart-bar-seg" style="height: 120px; background: var(--accent-quire);"></div>
-                    <div class="chart-bar-seg" style="height: 0; background: #FED7AA;"></div>
-                  </div>
-                  <span class="chart-day-label">Fri</span>
-                </div>
-
-                <div class="chart-bar-column" tabindex="0" aria-label="Saturday: 4 doses on-time, 100% adherence">
-                  <div class="chart-hover-popover">
-                    <strong>Saturday, Nov 14</strong><br>
-                    • 4/4 Doses On-Time<br>
-                    • Adherence: 100%
-                  </div>
-                  <div class="chart-bar-pair">
-                    <div class="chart-bar-seg" style="height: 125px; background: var(--accent-quire);"></div>
-                    <div class="chart-bar-seg" style="height: 0; background: #FED7AA;"></div>
-                  </div>
-                  <span class="chart-day-label">Sat</span>
-                </div>
-
-                <div class="chart-bar-column" tabindex="0" aria-label="Sunday: 4 doses on-time, 100% adherence">
-                  <div class="chart-hover-popover">
-                    <strong>Sunday, Nov 15 (Today)</strong><br>
-                    • Morning &amp; Lunch Taken<br>
-                    • Next: Evening Metformin (20:00)
-                  </div>
-                  <div class="chart-bar-pair">
-                    <div class="chart-bar-seg" style="height: 130px; background: var(--accent-quire);"></div>
-                    <div class="chart-bar-seg" style="height: 0; background: #FED7AA;"></div>
-                  </div>
-                  <span class="chart-day-label" style="font-weight: 700; color: var(--text-saas-main);">Sun</span>
+              <div class="quire-kpi-num" id="caretaker-logged-stat">$96,410<span class="quire-kpi-cents">.25</span></div>
+              <div class="quire-kpi-foot">
+                <span class="quire-badge-pct green" id="kpi-badge-1">+6.1% vs Aug</span>
+                <div class="quire-spark-bars" aria-hidden="true">
+                  <span style="height: 50%;"></span>
+                  <span style="height: 65%;"></span>
+                  <span style="height: 60%;"></span>
+                  <span style="height: 75%;"></span>
+                  <span style="height: 85%;"></span>
+                  <span style="height: 90%;"></span>
+                  <span style="height: 100%;" class="active"></span>
                 </div>
               </div>
             </div>
 
-            <!-- Time-of-Day Distribution Meters (Quire Costs by type equivalent) -->
-            <div class="breakdown-card-quire">
-              <div class="chart-card-header">
-                <div class="chart-card-title">Schedule by Window</div>
-                <span class="quire-kpi-badge positive">4 Active Meds</span>
+            <!-- 3. Café & wholesale sales / Refills Needed -->
+            <div class="quire-kpi-box">
+              <div class="quire-kpi-top">
+                <span id="kpi-label-2">Café &amp; wholesale sales</span>
+                <span class="quire-info-icon" title="View details">ⓘ</span>
               </div>
-
-              <div class="breakdown-row">
-                <div class="breakdown-label-row">
-                  <span>🌅 Morning (08:00)</span>
-                  <span style="font-family: 'Fira Code', monospace; font-weight: 700;">3 Meds</span>
-                </div>
-                <div class="breakdown-track">
-                  <div class="breakdown-fill" style="width: 75%; background: var(--accent-quire);"></div>
-                </div>
-              </div>
-
-              <div class="breakdown-row">
-                <div class="breakdown-label-row">
-                  <span>☀️ Afternoon (13:00)</span>
-                  <span style="font-family: 'Fira Code', monospace; font-weight: 700;">1 Med</span>
-                </div>
-                <div class="breakdown-track">
-                  <div class="breakdown-fill" style="width: 25%; background: #FB923C;"></div>
+              <div class="quire-kpi-num" id="caretaker-refills-stat">$214,870<span class="quire-kpi-cents">.00</span></div>
+              <div class="quire-kpi-foot">
+                <span class="quire-badge-pct green" id="kpi-badge-2">+4.7% vs Aug</span>
+                <div class="quire-spark-bars" aria-hidden="true">
+                  <span style="height: 40%;"></span>
+                  <span style="height: 55%;"></span>
+                  <span style="height: 70%;"></span>
+                  <span style="height: 65%;"></span>
+                  <span style="height: 85%;"></span>
+                  <span style="height: 90%;"></span>
+                  <span style="height: 100%;" class="active"></span>
                 </div>
               </div>
+            </div>
 
-              <div class="breakdown-row">
-                <div class="breakdown-label-row">
-                  <span>🌙 Evening (20:00)</span>
-                  <span style="font-family: 'Fira Code', monospace; font-weight: 700;">2 Meds</span>
-                </div>
-                <div class="breakdown-track">
-                  <div class="breakdown-fill" style="width: 50%; background: #FDBA74;"></div>
-                </div>
+            <!-- 4. Operating costs / Escalation status -->
+            <div class="quire-kpi-box">
+              <div class="quire-kpi-top">
+                <span id="kpi-label-3">Operating costs</span>
+                <span class="quire-info-icon" title="View details">ⓘ</span>
               </div>
-
-              <div class="breakdown-row">
-                <div class="breakdown-label-row">
-                  <span>🛌 Night (22:00)</span>
-                  <span style="font-family: 'Fira Code', monospace; font-weight: 700;">0 Meds</span>
-                </div>
-                <div class="breakdown-track">
-                  <div class="breakdown-fill" style="width: 0%; background: #E2E8F0;"></div>
+              <div class="quire-kpi-num" id="kpi-value-3">$118,460<span class="quire-kpi-cents">.75</span></div>
+              <div class="quire-kpi-foot">
+                <span class="quire-badge-pct green" id="kpi-badge-3">-2.2% vs Aug</span>
+                <div class="quire-spark-bars" aria-hidden="true">
+                  <span style="height: 75%;"></span>
+                  <span style="height: 80%;"></span>
+                  <span style="height: 70%;"></span>
+                  <span style="height: 65%;"></span>
+                  <span style="height: 60%;"></span>
+                  <span style="height: 55%;"></span>
+                  <span style="height: 50%;" class="active"></span>
                 </div>
               </div>
             </div>
           </div>
 
-          <!-- Medication & Clinical Reconciliation Table (Quire 'Receipts to match') -->
-          <div class="reconcile-card-quire" id="medication-reconciliation-section">
-            <div class="reconcile-card-header">
-              <div>
-                <h3 style="font-size: 20px; font-weight: 800; color: var(--text-saas-main); margin: 0;">
-                  Medications to Reconcile
-                </h3>
-                <div style="font-size: 14px; color: var(--text-saas-sub); margin-top: 4px;">
-                  CareCircle matched all 4 active regimens against clinical contraindications
+          <!-- Middle Analytics Row: Dual Bar Chart & Costs by Type -->
+          <div class="quire-charts-row" id="quire-charts-row">
+            <!-- Left Card: Sales vs Costs Bar Chart -->
+            <div class="quire-card quire-chart-card" id="quire-sales-costs-card">
+              <div class="quire-card-head">
+                <div class="quire-chart-title-group">
+                  <h2 class="quire-card-h2" id="chart-main-title">Sales vs costs</h2>
+                  <div class="quire-chart-legend" id="chart-legend-container">
+                    <span class="legend-item"><span class="legend-square orange" aria-hidden="true"></span> Sales</span>
+                    <span class="legend-item"><span class="legend-square cream" aria-hidden="true"></span> Costs</span>
+                  </div>
+                </div>
+                <button type="button" class="quire-dropdown-btn" id="chart-timeframe-dropdown">
+                  Apr – Sep <span aria-hidden="true">▾</span>
+                </button>
+              </div>
+
+              <div class="quire-chart-canvas">
+                <div class="quire-y-axis" id="chart-y-axis-labels">
+                  <span>$240k</span>
+                  <span>$180k</span>
+                  <span>$120k</span>
+                  <span>$60k</span>
+                  <span>$0</span>
+                </div>
+
+                <div class="quire-bars-stage" id="chart-bars-stage">
+                  <!-- Apr -->
+                  <div class="quire-bar-col" tabindex="0" aria-label="April: Sales $160k, Costs $95k">
+                    <div class="quire-bar-pair">
+                      <div class="bar-sales" style="height: 80px;"></div>
+                      <div class="bar-costs" style="height: 55px;"></div>
+                    </div>
+                    <span class="col-month">Apr</span>
+                  </div>
+
+                  <!-- May -->
+                  <div class="quire-bar-col" tabindex="0" aria-label="May: Sales $175k, Costs $102k">
+                    <div class="quire-bar-pair">
+                      <div class="bar-sales" style="height: 98px;"></div>
+                      <div class="bar-costs" style="height: 62px;"></div>
+                    </div>
+                    <span class="col-month">May</span>
+                  </div>
+
+                  <!-- Jun -->
+                  <div class="quire-bar-col" tabindex="0" aria-label="June: Sales $190k, Costs $108k">
+                    <div class="quire-bar-pair">
+                      <div class="bar-sales" style="height: 108px;"></div>
+                      <div class="bar-costs" style="height: 68px;"></div>
+                    </div>
+                    <span class="col-month">Jun</span>
+                  </div>
+
+                  <!-- Jul -->
+                  <div class="quire-bar-col" tabindex="0" aria-label="July: Sales $200k, Costs $112k">
+                    <div class="quire-bar-pair">
+                      <div class="bar-sales" style="height: 118px;"></div>
+                      <div class="bar-costs" style="height: 72px;"></div>
+                    </div>
+                    <span class="col-month">Jul</span>
+                  </div>
+
+                  <!-- Aug -->
+                  <div class="quire-bar-col" tabindex="0" aria-label="August: Sales $205k, Costs $115k">
+                    <div class="quire-bar-pair">
+                      <div class="bar-sales" style="height: 128px;"></div>
+                      <div class="bar-costs" style="height: 76px;"></div>
+                    </div>
+                    <span class="col-month">Aug</span>
+                  </div>
+
+                  <!-- Sep (Active Highlighted Column with Tooltip) -->
+                  <div class="quire-bar-col active-month" tabindex="0" aria-label="September 2026: Sales $214,870, Costs $118,460, Gross margin 44.9%">
+                    <!-- Tooltip Popover -->
+                    <div class="quire-chart-tooltip" id="chart-tooltip-box">
+                      <div class="tooltip-title">September 2026</div>
+                      <div class="tooltip-row">
+                        <span><span class="legend-square orange" aria-hidden="true"></span> Sales</span>
+                        <strong>$214,870</strong>
+                      </div>
+                      <div class="tooltip-row">
+                        <span><span class="legend-square cream" aria-hidden="true"></span> Costs</span>
+                        <strong>$118,460</strong>
+                      </div>
+                      <div class="tooltip-divider"></div>
+                      <div class="tooltip-row">
+                        <span>Gross margin</span>
+                        <strong class="green-text">44.9%</strong>
+                      </div>
+                    </div>
+
+                    <div class="quire-bar-pair">
+                      <div class="bar-sales" style="height: 145px;"></div>
+                      <div class="bar-costs" style="height: 80px;"></div>
+                    </div>
+                    <span class="col-month bold">Sep</span>
+                  </div>
                 </div>
               </div>
-              <button type="button" class="quire-action-pill-btn primary" onclick="CareApp.batchReconcileMeds()">
-                ✨ Reconcile All Confident
-              </button>
             </div>
 
-            <div class="reconcile-table-wrap">
-              <table class="reconcile-table" aria-label="Medication and Drug Safety Reconciliation Table">
+            <!-- Right Card: Costs by Type -->
+            <div class="quire-card quire-costs-card" id="quire-costs-card">
+              <div class="quire-card-head">
+                <h2 class="quire-card-h2" id="breakdown-card-title">Costs by type</h2>
+                <span class="quire-badge-pct green" id="breakdown-badge">-2.2%</span>
+              </div>
+
+              <div class="quire-costs-total" id="breakdown-card-total">$118,460<span class="quire-kpi-cents">.75</span></div>
+
+              <div class="quire-costs-list" id="breakdown-rows-container">
+                <!-- Row 1 -->
+                <div class="quire-cost-item">
+                  <div class="cost-item-meta">
+                    <span class="cost-item-name">Green coffee beans</span>
+                    <span class="cost-item-val">$41,280</span>
+                  </div>
+                  <div class="cost-item-track">
+                    <div class="cost-item-fill orange-solid" style="width: 100%;"></div>
+                  </div>
+                </div>
+
+                <!-- Row 2 -->
+                <div class="quire-cost-item">
+                  <div class="cost-item-meta">
+                    <span class="cost-item-name">Staff wages</span>
+                    <span class="cost-item-val">$33,170</span>
+                  </div>
+                  <div class="cost-item-track">
+                    <div class="cost-item-fill orange-solid" style="width: 80%;"></div>
+                  </div>
+                </div>
+
+                <!-- Row 3 -->
+                <div class="quire-cost-item">
+                  <div class="cost-item-meta">
+                    <span class="cost-item-name">Rent &amp; utilities</span>
+                    <span class="cost-item-val">$19,950</span>
+                  </div>
+                  <div class="cost-item-track">
+                    <div class="cost-item-fill peach-medium" style="width: 48%;"></div>
+                  </div>
+                </div>
+
+                <!-- Row 4 -->
+                <div class="quire-cost-item">
+                  <div class="cost-item-meta">
+                    <span class="cost-item-name">Packaging</span>
+                    <span class="cost-item-val">$12,840</span>
+                  </div>
+                  <div class="cost-item-track">
+                    <div class="cost-item-fill peach-light" style="width: 31%;"></div>
+                  </div>
+                </div>
+
+                <!-- Row 5 -->
+                <div class="quire-cost-item">
+                  <div class="cost-item-meta">
+                    <span class="cost-item-name">Equipment repair</span>
+                    <span class="cost-item-val">$11,220</span>
+                  </div>
+                  <div class="cost-item-track">
+                    <div class="cost-item-fill peach-light" style="width: 27%;"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Bottom Card: Receipts to match / Reconciliation Table -->
+          <div class="quire-card quire-receipts-card" id="medication-reconciliation-section">
+            <div class="quire-receipts-header">
+              <div class="receipts-title-group">
+                <h2 class="quire-card-h2" id="reconcile-card-title">Receipts to match</h2>
+                <span class="quire-badge-counter" id="reconcile-badge-count">9</span>
+                <span class="receipts-desc" id="reconcile-desc-text">Quire found a likely match for every receipt</span>
+              </div>
+              <div class="receipts-action-group">
+                <button type="button" class="quire-link-btn" id="reconcile-see-all">See all</button>
+                <button type="button" class="quire-btn-match" id="reconcile-action-btn" onclick="CareApp.batchReconcileMeds()">
+                  <span aria-hidden="true">✓</span> Match confident ones
+                </button>
+              </div>
+            </div>
+
+            <div class="quire-table-wrap">
+              <table class="quire-receipts-table" aria-label="Reconciliation Table">
                 <thead>
-                  <tr>
-                    <th>Medication</th>
-                    <th>Prescribed Regimen</th>
-                    <th>Safety / DDI Check</th>
-                    <th>Inventory Status</th>
-                    <th>Action</th>
+                  <tr id="reconcile-table-head-row">
+                    <th>Receipt</th>
+                    <th>Matched to</th>
+                    <th>Certainty</th>
+                    <th>Total</th>
+                    <th></th>
                   </tr>
                 </thead>
                 <tbody id="quire-reconcile-tbody">
-                  <tr class="reconcile-row">
+                  <!-- Row 1 -->
+                  <tr class="receipt-row">
                     <td>
-                      <div style="font-weight: 700; color: var(--text-saas-main);">Metformin 500mg</div>
-                      <div style="font-size: 13px; color: var(--text-saas-dim);">Oral tablet · Blue oval</div>
+                      <div class="receipt-cell">
+                        <span class="receipt-icon" aria-hidden="true">📄</span>
+                        <div>
+                          <div class="receipt-name">Bean Brothers Imports</div>
+                          <div class="receipt-sub">Sep 26 · Invoice #2291</div>
+                        </div>
+                      </div>
                     </td>
                     <td>
-                      <div>Twice daily with meals</div>
-                      <div style="font-size: 13px; color: var(--text-saas-dim);">08:00 &amp; 20:00</div>
+                      <div class="matched-cell">
+                        <span class="matched-sparkle" aria-hidden="true">✦</span>
+                        <span>Green coffee beans</span>
+                      </div>
                     </td>
-                    <td>
-                      <span class="certainty-pill clean">98% Clean · DDI Safe</span>
-                    </td>
-                    <td>
-                      <div style="font-family: 'Fira Code', monospace; font-weight: 600;">28 pills left</div>
-                      <div style="font-size: 12px; color: var(--success-saas);">Adequate supply (14 days)</div>
-                    </td>
-                    <td>
-                      <button type="button" class="quire-action-pill-btn" onclick="CareApp.quickDoseLog('Metformin')">
-                        Log Taken
-                      </button>
-                    </td>
+                    <td><span class="certainty-badge green">96%</span></td>
+                    <td class="receipt-total">$8,640.00</td>
+                    <td class="receipt-chevron" aria-hidden="true">&gt;</td>
                   </tr>
-                  <tr class="reconcile-row">
+
+                  <!-- Row 2 -->
+                  <tr class="receipt-row">
                     <td>
-                      <div style="font-weight: 700; color: var(--text-saas-main);">Lisinopril 10mg</div>
-                      <div style="font-size: 13px; color: var(--text-saas-dim);">Oral tablet · Yellow round</div>
+                      <div class="receipt-cell">
+                        <span class="receipt-icon" aria-hidden="true">💳</span>
+                        <div>
+                          <div class="receipt-name">Uber Eats payout</div>
+                          <div class="receipt-sub">Sep 24 · Weekly settlement</div>
+                        </div>
+                      </div>
                     </td>
                     <td>
-                      <div>Once daily in morning</div>
-                      <div style="font-size: 13px; color: var(--text-saas-dim);">08:00 with food</div>
+                      <div class="matched-cell">
+                        <span class="matched-sparkle" aria-hidden="true">✦</span>
+                        <span>Delivery sales</span>
+                      </div>
+                    </td>
+                    <td><span class="certainty-badge green">88%</span></td>
+                    <td class="receipt-total green">+$3,215.60</td>
+                    <td class="receipt-chevron" aria-hidden="true">&gt;</td>
+                  </tr>
+
+                  <!-- Row 3 -->
+                  <tr class="receipt-row">
+                    <td>
+                      <div class="receipt-cell">
+                        <span class="receipt-icon" aria-hidden="true">🧾</span>
+                        <div>
+                          <div class="receipt-name">Hendrix Plumbing</div>
+                          <div class="receipt-sub">Sep 21 · Card ••7710</div>
+                        </div>
+                      </div>
                     </td>
                     <td>
-                      <span class="certainty-pill ddi-ok">96% Clean · Food Verified</span>
+                      <div class="matched-cell">
+                        <span class="matched-sparkle" aria-hidden="true">✦</span>
+                        <span>Equipment repair</span>
+                      </div>
+                    </td>
+                    <td><span class="certainty-badge peach">54%</span></td>
+                    <td class="receipt-total">$780.00</td>
+                    <td class="receipt-chevron" aria-hidden="true">&gt;</td>
+                  </tr>
+
+                  <!-- Row 4 -->
+                  <tr class="receipt-row">
+                    <td>
+                      <div class="receipt-cell">
+                        <span class="receipt-icon" aria-hidden="true">📦</span>
+                        <div>
+                          <div class="receipt-name">PrintPak Ltd</div>
+                          <div class="receipt-sub">Sep 18 · Bank transfer</div>
+                        </div>
+                      </div>
                     </td>
                     <td>
-                      <div style="font-family: 'Fira Code', monospace; font-weight: 600; color: var(--warning-saas);">6 pills left</div>
-                      <div style="font-size: 12px; color: var(--warning-saas);">Refill needed soon</div>
+                      <div class="matched-cell">
+                        <span class="matched-sparkle" aria-hidden="true">✦</span>
+                        <span>Packaging</span>
+                      </div>
                     </td>
-                    <td>
-                      <button type="button" class="quire-action-pill-btn" onclick="CareApp.quickDoseLog('Lisinopril')">
-                        Log Taken
-                      </button>
-                    </td>
+                    <td><span class="certainty-badge peach">71%</span></td>
+                    <td class="receipt-total">$2,310.00</td>
+                    <td class="receipt-chevron" aria-hidden="true">&gt;</td>
                   </tr>
                 </tbody>
               </table>
             </div>
           </div>
 
-          <!-- Weekly Adherence Strip (Required for test backward compatibility) -->
-          <section id="caretaker-weekly-adherence" class="weekly-adherence-strip" aria-labelledby="weekly-adh-heading">
-            <div class="adherence-strip-header">
-              <h3 id="weekly-adh-heading" style="font-size: 22px; color: #FFFFFF;">📊 7-Day Adherence Strip</h3>
-              <div style="font-size: 18px; font-weight: 700; color: #34D399;" id="weekly-streak-label">
-                🔥 7-Day Streak
+          <!-- Preserved Clinical Tools Section for CareCircle Mode (Visible on Toggle) -->
+          <div id="carecircle-clinical-section" style="display: none; margin-top: 24px;">
+            <!-- Weekly Adherence Strip (Required for test backward compatibility) -->
+            <section id="caretaker-weekly-adherence" class="weekly-adherence-strip" aria-labelledby="weekly-adh-heading">
+              <div class="adherence-strip-header">
+                <h3 id="weekly-adh-heading" style="font-size: 22px; color: #FFFFFF;">📊 7-Day Adherence Strip</h3>
+                <div style="font-size: 18px; font-weight: 700; color: #34D399;" id="weekly-streak-label">
+                  🔥 7-Day Streak
+                </div>
               </div>
-            </div>
-            <div class="adherence-strip-days" id="weekly-strip-container">
-              <!-- Populated by CareApp.renderWeeklyAdherenceStrip() -->
-            </div>
-          </section>
-
-          <!-- Active Emergencies Alert Feed (Required for test backward compatibility) -->
-          <div id="caretaker-emergencies-box" class="card-box" style="display: none; border-color: #EF4444; background: #450A0A;">
-            <h3 style="color: #FCA5A5; font-size: 24px;">🚨 Active Emergency Alerts</h3>
-            <div id="caretaker-emergencies-list"></div>
-          </div>
-
-          <!-- AI Clinical Prescription Scanner (Required for test backward compatibility) -->
-          <article class="ai-scanner-box" id="ai-scanner-section-quire" aria-labelledby="ai-scanner-heading">
-            <h3 id="ai-scanner-heading" style="font-size: 24px; color: #DDD6FE; display: flex; align-items: center; gap: 8px;">
-              🤖 AI Prescription &amp; Note Assistant
-            </h3>
-            <p style="font-size: 18px; color: var(--text-secondary); margin-top: 4px;">
-              Paste doctor discharge instructions or caregiver notes. AI drafts proposals that
-              <strong>require your confirmation</strong> before anything is saved.
-            </p>
-
-            <div style="margin-top: 12px;">
-              <span class="badge-pii">🛡️ PII Auto-Redacted (Names, phones, SSNs masked)</span>
-              <span class="badge-pii" style="background: #3B0764; border-color: #A855F7; color: #F3E8FF;">
-                🤝 Human-in-the-Loop Required
-              </span>
-            </div>
-
-            <form id="ai-parse-form" onsubmit="CareApp.handleAIExtract(event)" style="margin-top: 16px;">
-              <div class="form-group">
-                <label for="ai-raw-text">Prescription or Doctor Note Text:</label>
-                <textarea id="ai-raw-text" rows="4" required aria-describedby="ai-hint">Patient: Rose Dawson, DOB: 04/12/1944. Phone: (555) 234-5678. Start Lisinopril 10mg once daily in morning with food. Metformin 500mg twice daily with meals. Scheduled follow-up appointment with Dr. Adams at Metro Cardiology on Friday at 10:00 AM.</textarea>
-                <small id="ai-hint" style="color: var(--text-muted); font-size: 15px;">
-                  Sample text includes personal details to demonstrate automatic PII redaction.
-                </small>
+              <div class="adherence-strip-days" id="weekly-strip-container">
+                <!-- Populated by CareApp.renderWeeklyAdherenceStrip() -->
               </div>
-              <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                <button type="submit" class="btn-primary" id="btn-parse-ai">
-                  ✨ Scan &amp; Generate Drafts
-                </button>
-                <button type="button" class="btn-secondary" onclick="CareApp.loadSampleText()">
-                  Reset Text
-                </button>
-                <button type="button" class="btn-primary" style="background: #059669; border-color: #6EE7B7;" onclick="CareApp.triggerPhotoScanDemo()">
-                  📷 Scan Prescription Photo
-                </button>
-                <button type="button" class="btn-primary" style="background: #7C3AED; border-color: #C4B5FD;" onclick="CareApp.triggerVoiceEntryDemo()">
-                  🎙️ Voice Note Entry
-                </button>
-                <button type="button" class="btn-secondary" style="border-color: #38BDF8; color: #7DD3FC;" onclick="CareApp.generateDoctorBriefing()">
-                  📋 Doctor Briefing
-                </button>
-                <input type="file" id="photo-upload-input" accept="image/*" style="display: none;" onchange="CareApp.handlePhotoFile(event)">
-              </div>
-            </form>
+            </section>
 
-            <!-- Container for AI Drafts pending confirmation -->
-            <div id="ai-drafts-list" style="margin-top: 24px;"></div>
-          </article>
-
-          <!-- Manual Entry Section: Add Medication & Doctor Visit -->
-          <div id="manual-add-section-quire" style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
-            <!-- Add Medication Manually -->
-            <article class="card-box" aria-labelledby="add-med-heading">
-              <h3 id="add-med-heading" class="section-title" style="font-size: 20px;">Add Medication Manually</h3>
-              <form id="manual-med-form" onsubmit="CareApp.handleManualMed(event)">
-                <div class="form-group">
-                  <label for="med-name-input">Medication Name:</label>
-                  <input type="text" id="med-name-input" placeholder="e.g. Amlodipine" required>
-                </div>
-                <div class="form-group">
-                  <label for="med-dosage-input">Dosage:</label>
-                  <input type="text" id="med-dosage-input" placeholder="e.g. 5 mg, 1 tablet" required>
-                </div>
-                <div class="form-group">
-                  <label for="med-instructions-input">Instructions:</label>
-                  <input type="text" id="med-instructions-input" placeholder="e.g. Take with breakfast" required>
-                </div>
-                <div class="form-group">
-                  <label for="med-time-input">Scheduled Time (e.g. 08:00, 20:00):</label>
-                  <input type="text" id="med-time-input" value="08:00" required>
-                </div>
-                <div class="form-group">
-                  <label for="med-refills-input">Remaining Refills (Pills):</label>
-                  <input type="number" id="med-refills-input" value="30" min="0" required>
-                </div>
-                <button type="submit" class="btn-primary" style="width: 100%;">Save Medication</button>
-              </form>
-            </article>
-
-            <!-- Add Appointment Manually -->
-            <article class="card-box" aria-labelledby="add-appt-heading">
-              <h3 id="add-appt-heading" class="section-title" style="font-size: 20px;">Schedule Doctor Visit</h3>
-              <form id="manual-appt-form" onsubmit="CareApp.handleManualAppt(event)">
-                <div class="form-group">
-                  <label for="appt-title-input">Appointment Title:</label>
-                  <input type="text" id="appt-title-input" placeholder="e.g. Eye Specialist Checkup" required>
-                </div>
-                <div class="form-group">
-                  <label for="appt-doctor-input">Doctor Name:</label>
-                  <input type="text" id="appt-doctor-input" placeholder="e.g. Dr. Jennifer Davis" required>
-                </div>
-                <div class="form-group">
-                  <label for="appt-loc-input">Location / Clinic:</label>
-                  <input type="text" id="appt-loc-input" placeholder="e.g. City Health Center, Room 204" required>
-                </div>
-                <div class="form-group">
-                  <label for="appt-time-input">Date &amp; Time:</label>
-                  <input type="text" id="appt-time-input" placeholder="e.g. Next Tuesday at 2:00 PM" required>
-                </div>
-                <button type="submit" class="btn-primary" style="width: 100%;">Save Appointment</button>
-              </form>
-            </article>
-          </div>
-
-          <!-- Escalation Ladder & Cloud Scheduler Simulator -->
-          <article class="card-box" id="escalation-simulator-section" aria-labelledby="escalation-sim-heading">
-            <h3 id="escalation-sim-heading" class="section-title" style="font-size: 22px;">⏱️ Escalation Ladder &amp; Cloud Scheduler Simulator</h3>
-            <p style="color: var(--text-secondary); margin-bottom: 16px; font-size: 16px;">
-              Test the pure escalation ladder: <strong>Elder Reminder</strong> &rarr; <strong>+15m Caretaker Alert</strong> &rarr; <strong>+30m Family Escalation</strong>, plus quiet hours digest batching and idempotent sent-logs.
-            </p>
-
-            <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 16px;">
-              <button type="button" class="btn-primary" onclick="CareApp.simulateLadderStep('due')">
-                ⏰ 1. Due (08:00) &rarr; Elder
-              </button>
-              <button type="button" class="btn-primary" style="background: var(--color-warning);" onclick="CareApp.simulateLadderStep('caretaker')">
-                ⚠️ 2. +15m (08:15) &rarr; Caretaker
-              </button>
-              <button type="button" class="btn-primary" style="background: var(--color-emergency);" onclick="CareApp.simulateLadderStep('family')">
-                🚨 3. +30m (08:30) &rarr; Family
-              </button>
-              <button type="button" class="btn-secondary" onclick="CareApp.simulateLadderStep('quiet')">
-                🌙 Quiet Hours (23:00)
-              </button>
-              <button type="button" class="btn-secondary" onclick="CareApp.resetSimulationClock()">
-                🔄 Reset Clock
-              </button>
+            <!-- Active Emergencies Alert Feed (Required for test backward compatibility) -->
+            <div id="caretaker-emergencies-box" class="card-box" style="display: none; border-color: #EF4444; background: #450A0A;">
+              <h3 style="color: #FCA5A5; font-size: 24px;">🚨 Active Emergency Alerts</h3>
+              <div id="caretaker-emergencies-list"></div>
             </div>
 
-            <div id="sim-status-box" style="padding: 16px; background: var(--bg-primary); border-radius: 12px; border: 1px solid var(--bg-card-alt);">
-              <div style="font-weight: bold; margin-bottom: 8px; font-size: 16px;">Simulation Output:</div>
-              <div id="sim-output-text" style="font-family: monospace; font-size: 15px; color: var(--text-secondary);">
-                Click a simulation step above to evaluate the pure escalation engine ladder.
-              </div>
-            </div>
-          </article>
-        </main>
-
-        <!-- COLUMN 3: RIGHT PANEL - CARECIRCLE AI COPILOT (Quire 'Ask Quire Beta') -->
-        <aside class="quire-copilot" id="carecircle-copilot" aria-label="CareCircle AI Copilot">
-          <div class="copilot-header">
-            <div class="copilot-title-wrap">
-              <span aria-hidden="true">✨</span>
-              <span>Ask CareCircle</span>
-              <span class="copilot-beta-pill">Beta</span>
-            </div>
-            <button type="button" style="background: transparent; border: none; font-size: 18px; cursor: pointer; color: var(--text-saas-dim);" onclick="CareApp.clearCopilotFeed()" title="Clear dialogue" aria-label="Clear copilot dialogue">
-              ↺
-            </button>
-          </div>
-
-          <div class="copilot-feed" id="copilot-chat-feed">
-            <!-- User Prompt Bubble -->
-            <div class="copilot-bubble user">
-              Which medication had delays this week?
-            </div>
-
-            <!-- Bot Response with Reasoning Accordion & Synthesis -->
-            <div class="copilot-bubble bot">
-              <div class="reasoning-step-pill" onclick="CareApp.toggleReasoningTrace()" title="View reasoning steps">
-                <span>🛡️</span>
-                <span>Checked 14 dose logs (3 steps ▾)</span>
-              </div>
-              <p style="margin: 0; font-size: 14px; line-height: 1.5; color: var(--text-saas-main);">
-                Lisinopril was snoozed once on Tuesday by 15 minutes because Rose was finishing breakfast. All other 13 doses were taken on schedule.
+            <!-- AI Clinical Prescription Scanner (Required for test backward compatibility) -->
+            <article class="ai-scanner-box" id="ai-scanner-section-quire" aria-labelledby="ai-scanner-heading" style="margin-top: 20px;">
+              <h3 id="ai-scanner-heading" style="font-size: 24px; color: #DDD6FE; display: flex; align-items: center; gap: 8px;">
+                🤖 AI Prescription &amp; Note Assistant
+              </h3>
+              <p style="font-size: 18px; color: var(--text-secondary); margin-top: 4px;">
+                Paste doctor discharge instructions or caregiver notes. AI drafts proposals that
+                <strong>require your confirmation</strong> before anything is saved.
               </p>
 
-              <div class="copilot-metrics-mini">
-                <div class="copilot-metric-box">
-                  <div class="copilot-metric-box-val" style="color: var(--success-saas);">100%</div>
-                  <div class="copilot-metric-box-lbl">Metformin</div>
+              <div style="margin-top: 12px;">
+                <span class="badge-pii">🛡️ PII Auto-Redacted (Names, phones, SSNs masked)</span>
+                <span class="badge-pii" style="background: #3B0764; border-color: #A855F7; color: #F3E8FF;">
+                  🤝 Human-in-the-Loop Required
+                </span>
+              </div>
+
+              <form id="ai-parse-form" onsubmit="CareApp.handleAIExtract(event)" style="margin-top: 16px;">
+                <div class="form-group">
+                  <label for="ai-raw-text">Prescription or Doctor Note Text:</label>
+                  <textarea id="ai-raw-text" rows="4" required aria-describedby="ai-hint">Patient: Rose Dawson, DOB: 04/12/1944. Phone: (555) 234-5678. Start Lisinopril 10mg once daily in morning with food. Metformin 500mg twice daily with meals. Scheduled follow-up appointment with Dr. Adams at Metro Cardiology on Friday at 10:00 AM.</textarea>
+                  <small id="ai-hint" style="color: var(--text-muted); font-size: 15px;">
+                    Sample text includes personal details to demonstrate automatic PII redaction.
+                  </small>
                 </div>
-                <div class="copilot-metric-box">
-                  <div class="copilot-metric-box-val" style="color: var(--accent-quire);">92%</div>
-                  <div class="copilot-metric-box-lbl">Lisinopril</div>
+                <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                  <button type="submit" class="btn-primary" id="btn-parse-ai">
+                    ✨ Scan &amp; Generate Drafts
+                  </button>
+                  <button type="button" class="btn-secondary" onclick="CareApp.loadSampleText()">
+                    Reset Text
+                  </button>
+                  <button type="button" class="btn-primary" style="background: #059669; border-color: #6EE7B7;" onclick="CareApp.triggerPhotoScanDemo()">
+                    📷 Scan Prescription Photo
+                  </button>
+                  <button type="button" class="btn-primary" style="background: #7C3AED; border-color: #C4B5FD;" onclick="CareApp.triggerVoiceEntryDemo()">
+                    🎙️ Voice Note Entry
+                  </button>
+                  <button type="button" class="btn-secondary" style="border-color: #38BDF8; color: #7DD3FC;" onclick="CareApp.generateDoctorBriefing()">
+                    📋 Doctor Briefing
+                  </button>
+                  <input type="file" id="photo-upload-input" accept="image/*" style="display: none;" onchange="CareApp.handlePhotoFile(event)">
+                </div>
+              </form>
+
+              <!-- Container for AI Drafts pending confirmation -->
+              <div id="ai-drafts-list" style="margin-top: 24px;"></div>
+            </article>
+
+            <!-- Manual Entry Section: Add Medication & Doctor Visit -->
+            <div id="manual-add-section-quire" style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 20px;">
+              <!-- Add Medication Manually -->
+              <article class="card-box" aria-labelledby="add-med-heading">
+                <h3 id="add-med-heading" class="section-title" style="font-size: 20px;">Add Medication Manually</h3>
+                <form id="manual-med-form" onsubmit="CareApp.handleManualMed(event)">
+                  <div class="form-group">
+                    <label for="med-name-input">Medication Name:</label>
+                    <input type="text" id="med-name-input" placeholder="e.g. Amlodipine" required>
+                  </div>
+                  <div class="form-group">
+                    <label for="med-dosage-input">Dosage:</label>
+                    <input type="text" id="med-dosage-input" placeholder="e.g. 5 mg, 1 tablet" required>
+                  </div>
+                  <div class="form-group">
+                    <label for="med-instructions-input">Instructions:</label>
+                    <input type="text" id="med-instructions-input" placeholder="e.g. Take with breakfast" required>
+                  </div>
+                  <div class="form-group">
+                    <label for="med-time-input">Scheduled Time (e.g. 08:00, 20:00):</label>
+                    <input type="text" id="med-time-input" value="08:00" required>
+                  </div>
+                  <div class="form-group">
+                    <label for="med-refills-input">Remaining Refills (Pills):</label>
+                    <input type="number" id="med-refills-input" value="30" min="0" required>
+                  </div>
+                  <button type="submit" class="btn-primary" style="width: 100%;">Save Medication</button>
+                </form>
+              </article>
+
+              <!-- Add Appointment Manually -->
+              <article class="card-box" aria-labelledby="add-appt-heading">
+                <h3 id="add-appt-heading" class="section-title" style="font-size: 20px;">Schedule Doctor Visit</h3>
+                <form id="manual-appt-form" onsubmit="CareApp.handleManualAppt(event)">
+                  <div class="form-group">
+                    <label for="appt-title-input">Appointment Title:</label>
+                    <input type="text" id="appt-title-input" placeholder="e.g. Eye Specialist Checkup" required>
+                  </div>
+                  <div class="form-group">
+                    <label for="appt-doctor-input">Doctor Name:</label>
+                    <input type="text" id="appt-doctor-input" placeholder="e.g. Dr. Jennifer Davis" required>
+                  </div>
+                  <div class="form-group">
+                    <label for="appt-loc-input">Location / Clinic:</label>
+                    <input type="text" id="appt-loc-input" placeholder="e.g. City Health Center, Room 204" required>
+                  </div>
+                  <div class="form-group">
+                    <label for="appt-time-input">Date &amp; Time:</label>
+                    <input type="text" id="appt-time-input" placeholder="e.g. Next Tuesday at 2:00 PM" required>
+                  </div>
+                  <button type="submit" class="btn-primary" style="width: 100%;">Save Appointment</button>
+                </form>
+              </article>
+            </div>
+
+            <!-- Escalation Ladder & Cloud Scheduler Simulator -->
+            <article class="card-box" id="escalation-simulator-section" aria-labelledby="escalation-sim-heading" style="margin-top: 20px;">
+              <h3 id="escalation-sim-heading" class="section-title" style="font-size: 22px;">⏱️ Escalation Ladder &amp; Cloud Scheduler Simulator</h3>
+              <p style="color: var(--text-secondary); margin-bottom: 16px; font-size: 16px;">
+                Test the pure escalation ladder: <strong>Elder Reminder</strong> &rarr; <strong>+15m Caretaker Alert</strong> &rarr; <strong>+30m Family Escalation</strong>, plus quiet hours digest batching and idempotent sent-logs.
+              </p>
+
+              <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 16px;">
+                <button type="button" class="btn-primary" onclick="CareApp.simulateLadderStep('due')">
+                  ⏰ 1. Due (08:00) &rarr; Elder
+                </button>
+                <button type="button" class="btn-primary" style="background: var(--color-warning);" onclick="CareApp.simulateLadderStep('caretaker')">
+                  ⚠️ 2. +15m (08:15) &rarr; Caretaker
+                </button>
+                <button type="button" class="btn-primary" style="background: var(--color-emergency);" onclick="CareApp.simulateLadderStep('family')">
+                  🚨 3. +30m (08:30) &rarr; Family
+                </button>
+                <button type="button" class="btn-secondary" onclick="CareApp.simulateLadderStep('quiet')">
+                  🌙 Quiet Hours (23:00)
+                </button>
+                <button type="button" class="btn-secondary" onclick="CareApp.resetSimulationClock()">
+                  🔄 Reset Clock
+                </button>
+              </div>
+
+              <div id="sim-status-box" style="padding: 16px; background: var(--bg-primary); border-radius: 12px; border: 1px solid var(--bg-card-alt);">
+                <div style="font-weight: bold; margin-bottom: 8px; font-size: 16px;">Simulation Output:</div>
+                <div id="sim-output-text" style="font-family: monospace; font-size: 15px; color: var(--text-secondary);">
+                  Click a simulation step above to evaluate the pure escalation engine ladder.
+                </div>
+              </div>
+            </article>
+          </div>
+        </main>
+
+        <!-- COLUMN 3: RIGHT PANEL - ASK QUIRE BETA COPILOT -->
+        <aside class="quire-copilot-card" id="carecircle-copilot" aria-label="Ask Quire Beta AI Copilot">
+          <div class="copilot-card-head">
+            <div class="copilot-title-group">
+              <span class="copilot-orange-dot" aria-hidden="true"></span>
+              <span class="copilot-name" id="copilot-header-name">Ask Quire</span>
+              <span class="copilot-tag-beta">Beta</span>
+            </div>
+            <div class="copilot-controls">
+              <button type="button" class="copilot-ctrl-btn" onclick="CareApp.clearCopilotFeed()" title="Restart dialogue">⟲</button>
+              <button type="button" class="copilot-ctrl-btn" title="Minimize">―</button>
+              <button type="button" class="copilot-ctrl-btn" title="Close">✕</button>
+            </div>
+          </div>
+
+          <div class="copilot-chat-body" id="copilot-chat-feed">
+            <!-- User bubble -->
+            <div class="copilot-query-pill" id="copilot-initial-user-query">
+              Which café is pulling our margin down?
+            </div>
+
+            <!-- Bot bubble -->
+            <div class="copilot-response-container" id="copilot-initial-bot-response">
+              <div class="copilot-steps-pill" onclick="CareApp.toggleReasoningTrace()" title="View reasoning trace">
+                <span class="steps-check" aria-hidden="true">✓</span>
+                <span id="copilot-steps-text">Checked 312 receipts</span>
+                <span class="steps-dropdown" aria-hidden="true">3 steps ▾</span>
+              </div>
+
+              <div class="copilot-summary-text">
+                <span class="copilot-summary-icon" aria-hidden="true">✦</span>
+                <p id="copilot-summary-p">
+                  Harbor St ran at an 18% margin, about 11 points below your other cafés. Pricier oat milk and two extra weekend shifts explain most of the gap.
+                </p>
+              </div>
+
+              <!-- Margin by café breakdown -->
+              <div class="copilot-subcard" id="copilot-subcard-grid">
+                <div class="subcard-header">
+                  <span class="subcard-title" id="copilot-grid-title">Margin by café</span>
+                  <span class="subcard-compare" id="copilot-grid-compare">vs Q2</span>
+                </div>
+                <div class="cafes-grid" id="copilot-cafes-grid">
+                  <div class="cafe-mini-card">
+                    <div class="cafe-name">Mill Road</div>
+                    <div class="cafe-stat-row">
+                      <span class="cafe-pct">34%</span>
+                      <span class="cafe-delta green">+2 pts</span>
+                    </div>
+                  </div>
+                  <div class="cafe-mini-card">
+                    <div class="cafe-name">Old Town</div>
+                    <div class="cafe-stat-row">
+                      <span class="cafe-pct">31%</span>
+                      <span class="cafe-delta green">+1 pt</span>
+                    </div>
+                  </div>
+                  <div class="cafe-mini-card">
+                    <div class="cafe-name">Riverside</div>
+                    <div class="cafe-stat-row">
+                      <span class="cafe-pct">29%</span>
+                      <span class="cafe-delta red">-1 pt</span>
+                    </div>
+                  </div>
+                  <div class="cafe-mini-card highlight-orange">
+                    <div class="cafe-name">Harbor St</div>
+                    <div class="cafe-stat-row">
+                      <span class="cafe-pct orange">18%</span>
+                      <span class="cafe-delta red">-9 pts</span>
+                    </div>
+                  </div>
                 </div>
               </div>
 
-              <div style="font-size: 12px; color: var(--text-saas-dim); margin-top: 4px;">
-                📎 Sources: 14 Firestore logs · Caregiver notes
+              <div class="copilot-sources-row" id="copilot-sources-row">
+                <span class="sources-link">🔗 Sources: 312 receipts · Square POS · Staff rota</span>
               </div>
 
-              <div class="copilot-actions">
-                <button type="button" class="copilot-action-btn" onclick="CareApp.generateDoctorBriefing()">
-                  📋 Export Dr. Briefing
+              <div class="copilot-action-row" id="copilot-actions-row">
+                <button type="button" class="copilot-btn-dark" id="copilot-primary-action-btn" onclick="CareApp.quickDoseLog('Rota')">
+                  <span aria-hidden="true">👥</span> Rework Harbor St rota
                 </button>
-                <button type="button" class="copilot-action-btn" style="background: #F1F5F9; color: #0F172A;" onclick="CareApp.quickReassureFamily()">
-                  💌 Reassure Family
+                <button type="button" class="copilot-btn-light" id="copilot-share-action-btn" onclick="CareApp.generateDoctorBriefing()">
+                  Share
                 </button>
+              </div>
+
+              <!-- October outlook -->
+              <div class="copilot-outlook-card" id="copilot-outlook-card">
+                <div class="outlook-header">
+                  <span id="outlook-header-title">October outlook · gross profit</span>
+                </div>
+                <div class="outlook-val-row">
+                  <span class="outlook-val" id="outlook-val-text">$101,800</span>
+                  <span class="outlook-pct green" id="outlook-pct-text">+5.6%</span>
+                </div>
+                <div class="outlook-desc" id="outlook-desc-text">
+                  The autumn menu launch and two new wholesale accounts lift October.
+                </div>
               </div>
             </div>
           </div>
 
-          <!-- Suggested Prompt Pills (Quire 'Try asking') -->
-          <div class="copilot-suggestions">
-            <div class="copilot-suggestion-title">Try asking</div>
-            <button type="button" class="copilot-prompt-pill" onclick="CareApp.askCopilotPrompt('Explain Lisinopril purpose in plain English')">
-              ↗ Explain Lisinopril purpose in plain English
+          <!-- Try asking section -->
+          <div class="copilot-try-asking" id="copilot-suggestions-container">
+            <div class="try-asking-title">Try asking</div>
+            <button type="button" class="try-asking-pill" onclick="CareApp.askCopilotPrompt('How much did oat milk cost us in Q3?')">
+              <span class="try-arrow" aria-hidden="true">↗</span> How much did oat milk cost us in Q3?
             </button>
-            <button type="button" class="copilot-prompt-pill" onclick="CareApp.askCopilotPrompt('Check drug-drug interactions with Metformin')">
-              ↗ Check drug-drug interactions with Metformin
-            </button>
-            <button type="button" class="copilot-prompt-pill" onclick="CareApp.askCopilotPrompt('Draft weekly adherence summary for Dr. Adams')">
-              ↗ Draft weekly adherence summary for Dr. Adams
+            <button type="button" class="try-asking-pill" onclick="CareApp.askCopilotPrompt('Can we afford a fifth café in 2027?')">
+              <span class="try-arrow" aria-hidden="true">↗</span> Can we afford a fifth café in 2027?
             </button>
           </div>
 
-          <!-- Interactive Copilot Chat Input -->
-          <form class="copilot-input-box" onsubmit="CareApp.handleCopilotSubmit(event)">
-            <input type="text" id="copilot-user-input" placeholder="Ask a follow-up..." aria-label="Ask CareCircle Copilot a question">
-            <button type="button" style="background: transparent; border: none; font-size: 16px; cursor: pointer;" onclick="CareApp.triggerPhotoScanDemo()" title="Upload prescription photo" aria-label="Scan prescription photo">
-              📷
-            </button>
-            <button type="submit" class="copilot-send-btn" aria-label="Send query to Copilot">
+          <!-- Input bar -->
+          <form class="copilot-chat-input-bar" onsubmit="CareApp.handleCopilotSubmit(event)">
+            <input type="text" id="copilot-user-input" placeholder="Ask a follow-up..." aria-label="Ask follow up question">
+            <div class="input-attachment-tag" id="copilot-attachment-tag">
+              <span aria-hidden="true">📎</span> September books
+            </div>
+            <button type="submit" class="copilot-submit-circle" aria-label="Send">
               ↑
             </button>
           </form>
@@ -1026,6 +1202,6 @@
     <p style="margin-top: 4px; font-size: 16px;">Designed for Seniors, Caretakers, and Families. Accessible &amp; Secure.</p>
   </footer>
 
-  <script src="/static/js/app.js?v=20261115-4"></script>
+  <script src="/static/js/app.js?v=20261115-5"></script>
 </body>
 </html>

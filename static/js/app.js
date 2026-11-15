@@ -848,9 +848,11 @@ const CareApp = (() => {
    */
   async function loadCaretakerData() {
     const stats = await apiFetch("/api/medications/adherence");
-    document.getElementById("caretaker-adherence-stat").textContent = `${stats.adherence_percentage}%`;
-    document.getElementById("caretaker-logged-stat").textContent = stats.total_logged;
-    document.getElementById("caretaker-refills-stat").textContent = stats.needs_refill_count;
+    if (currentQuireMode === "carecircle") {
+      document.getElementById("caretaker-adherence-stat").textContent = `${stats.adherence_percentage}%`;
+      document.getElementById("caretaker-logged-stat").textContent = stats.total_logged;
+      document.getElementById("caretaker-refills-stat").textContent = stats.needs_refill_count;
+    }
 
     renderCaretakerDashboard(stats);
 
@@ -1372,205 +1374,356 @@ const CareApp = (() => {
     const btnCare = document.getElementById("btn-mode-carecircle");
     if (btnQuire && btnCare) {
       if (mode === "quire") {
-        btnQuire.className = "quire-action-pill-btn primary";
-        btnCare.className = "quire-action-pill-btn";
-        btnCare.style.border = "none";
-        btnCare.style.background = "transparent";
+        btnQuire.classList.add("active");
+        btnCare.classList.remove("active");
+        btnQuire.setAttribute("aria-selected", "true");
+        btnCare.setAttribute("aria-selected", "false");
       } else {
-        btnCare.className = "quire-action-pill-btn primary";
-        btnQuire.className = "quire-action-pill-btn";
-        btnQuire.style.border = "none";
-        btnQuire.style.background = "transparent";
+        btnCare.classList.add("active");
+        btnQuire.classList.remove("active");
+        btnCare.setAttribute("aria-selected", "true");
+        btnQuire.setAttribute("aria-selected", "false");
       }
     }
 
     if (mode === "quire") {
-      const orgWrap = document.querySelector(".patient-profile-card");
-      if (orgWrap) {
-        orgWrap.innerHTML = `
-          <div style="width: 38px; height: 38px; border-radius: 8px; background: #059669; color: #FFFFFF; font-size: 20px; display: flex; align-items: center; justify-content: center; font-weight: 800;">O</div>
-          <div style="flex: 1; min-width: 0;">
-            <div style="font-size: 15px; font-weight: 700; color: #0F172A; display: flex; align-items: center; justify-content: space-between;">
-              <span>Orchard Lane Coffee</span>
-              <span style="font-size: 12px; color: #94A3B8;">⇅</span>
-            </div>
-            <div style="font-size: 12px; color: #64748B;">4 cafés · Books</div>
-          </div>
-        `;
-      }
+      // 1. Sidebar Organization Card
+      const orgIcon = document.getElementById("org-avatar-box");
+      if (orgIcon) orgIcon.textContent = "O";
+      const orgName = document.getElementById("org-name-text");
+      if (orgName) orgName.textContent = "Orchard Lane Coffee";
+      const orgMeta = document.getElementById("org-meta-text");
+      if (orgMeta) orgMeta.textContent = "4 cafés · Books";
 
-      const title = document.querySelector(".quire-greeting-title");
-      if (title) title.textContent = "Good morning, Marco";
-      const sub = document.querySelector(".quire-greeting-sub");
-      if (sub) sub.innerHTML = `📅 Sep 1 – Sep 30, 2026 <span style="font-size:12px; color:#94A3B8;">▾ · Updated just now</span>`;
-      
-      const switcher = document.querySelector(".quire-period-switcher");
-      if (switcher) {
-        switcher.innerHTML = `
-          <button type="button" class="quire-period-btn active" onclick="CareApp.setPeriod('september')">September</button>
-          <button type="button" class="quire-period-btn" onclick="CareApp.setPeriod('q3')">Q3</button>
-          <button type="button" class="quire-period-btn" onclick="CareApp.setPeriod('2026')">2026</button>
-        `;
-      }
+      // 2. Main Greeting & Period
+      const greeting = document.getElementById("quire-heading-greeting");
+      if (greeting) greeting.textContent = "Good morning, Marco";
+      const dateRange = document.getElementById("quire-date-range");
+      if (dateRange) dateRange.textContent = "📅 Sep 1 – Sep 30, 2026";
+      const dateUpdated = document.getElementById("quire-date-updated-text");
+      if (dateUpdated) dateUpdated.textContent = "· Updated just now";
 
-      const kpis = document.querySelectorAll(".quire-kpi-card");
-      if (kpis.length >= 4) {
-        const l0 = kpis[0].querySelector(".quire-kpi-label span");
-        if (l0) l0.textContent = "Bank balance";
-        kpis[0].querySelector(".quire-kpi-value").textContent = "$648,215.40";
-        kpis[0].querySelector(".quire-kpi-badge").textContent = "+3.8% vs Aug";
+      const seg0 = document.getElementById("seg-period-0");
+      const seg1 = document.getElementById("seg-period-1");
+      const seg2 = document.getElementById("seg-period-2");
+      if (seg0) { seg0.textContent = "September"; seg0.classList.add("active"); }
+      if (seg1) { seg1.textContent = "Q3"; seg1.classList.remove("active"); }
+      if (seg2) { seg2.textContent = "2026"; seg2.classList.remove("active"); }
 
-        const l1 = kpis[1].querySelector(".quire-kpi-label span");
-        if (l1) l1.textContent = "Gross profit";
-        kpis[1].querySelector(".quire-kpi-value").textContent = "$96,410.25";
-        kpis[1].querySelector(".quire-kpi-badge").textContent = "+6.1% vs Aug";
+      // 3. 4-KPI Metric Cards (Exact Quire Values)
+      const l0 = document.getElementById("kpi-label-0");
+      if (l0) l0.textContent = "Bank balance";
+      const v0 = document.getElementById("caretaker-adherence-stat");
+      if (v0) v0.innerHTML = "$648,215<span class=\"quire-kpi-cents\">.40</span>";
+      const b0 = document.getElementById("kpi-badge-0");
+      if (b0) { b0.className = "quire-badge-pct green"; b0.textContent = "+3.8% vs Aug"; }
 
-        const l2 = kpis[2].querySelector(".quire-kpi-label span");
-        if (l2) l2.textContent = "Café & wholesale sales";
-        kpis[2].querySelector(".quire-kpi-value").textContent = "$214,870.00";
-        kpis[2].querySelector(".quire-kpi-badge").textContent = "+4.7% vs Aug";
+      const l1 = document.getElementById("kpi-label-1");
+      if (l1) l1.textContent = "Gross profit";
+      const v1 = document.getElementById("caretaker-logged-stat");
+      if (v1) v1.innerHTML = "$96,410<span class=\"quire-kpi-cents\">.25</span>";
+      const b1 = document.getElementById("kpi-badge-1");
+      if (b1) { b1.className = "quire-badge-pct green"; b1.textContent = "+6.1% vs Aug"; }
 
-        const l3 = kpis[3].querySelector(".quire-kpi-label span");
-        if (l3) l3.textContent = "Operating costs";
-        kpis[3].querySelector(".quire-kpi-value").textContent = "$118,460.75";
-        kpis[3].querySelector(".quire-kpi-badge").textContent = "-2.2% vs Aug";
-      }
+      const l2 = document.getElementById("kpi-label-2");
+      if (l2) l2.textContent = "Café & wholesale sales";
+      const v2 = document.getElementById("caretaker-refills-stat");
+      if (v2) v2.innerHTML = "$214,870<span class=\"quire-kpi-cents\">.00</span>";
+      const b2 = document.getElementById("kpi-badge-2");
+      if (b2) { b2.className = "quire-badge-pct green"; b2.textContent = "+4.7% vs Aug"; }
 
-      const chartTitle = document.querySelector(".chart-card-title span");
+      const l3 = document.getElementById("kpi-label-3");
+      if (l3) l3.textContent = "Operating costs";
+      const v3 = document.getElementById("kpi-value-3");
+      if (v3) v3.innerHTML = "$118,460<span class=\"quire-kpi-cents\">.75</span>";
+      const b3 = document.getElementById("kpi-badge-3");
+      if (b3) { b3.className = "quire-badge-pct green"; b3.textContent = "-2.2% vs Aug"; }
+
+      // 4. Middle Row: Sales vs Costs & Costs by Type
+      const chartTitle = document.getElementById("chart-main-title");
       if (chartTitle) chartTitle.textContent = "Sales vs costs";
-      const breakdownTitle = document.querySelector(".breakdown-card-quire .chart-card-title");
-      if (breakdownTitle) breakdownTitle.textContent = "Costs by type";
+      const bTitle = document.getElementById("breakdown-card-title");
+      if (bTitle) bTitle.textContent = "Costs by type";
+      const bBadge = document.getElementById("breakdown-badge");
+      if (bBadge) bBadge.textContent = "-2.2%";
+      const bTotal = document.getElementById("breakdown-card-total");
+      if (bTotal) bTotal.innerHTML = "$118,460<span class=\"quire-kpi-cents\">.75</span>";
 
-      const recHeader = document.querySelector(".reconcile-card-header h3");
-      if (recHeader) recHeader.innerHTML = `Receipts to match <span style="background:#FFEDD5; color:#EA580C; font-size:12px; padding:2px 8px; border-radius:9999px;">9</span>`;
-      const recSub = document.querySelector(".reconcile-card-header div div");
-      if (recSub) recSub.textContent = "Quire found a likely match for every receipt";
+      // 5. Receipts to Match Card
+      const recTitle = document.getElementById("reconcile-card-title");
+      if (recTitle) recTitle.textContent = "Receipts to match";
+      const recCount = document.getElementById("reconcile-badge-count");
+      if (recCount) recCount.textContent = "9";
+      const recDesc = document.getElementById("reconcile-desc-text");
+      if (recDesc) recDesc.textContent = "Quire found a likely match for every receipt";
+      const recAction = document.getElementById("reconcile-action-btn");
+      if (recAction) recAction.innerHTML = `<span aria-hidden="true">✓</span> Match confident ones`;
 
       const tbody = document.getElementById("quire-reconcile-tbody");
       if (tbody) {
         tbody.innerHTML = `
-          <tr class="reconcile-row">
+          <tr class="receipt-row">
             <td>
-              <div style="font-weight: 700; color: #0F172A; display: flex; align-items: center; gap: 8px;">
-                <span>📄</span>
+              <div class="receipt-cell">
+                <span class="receipt-icon" aria-hidden="true">📄</span>
                 <div>
-                  <div>Bean Brothers Imports</div>
-                  <div style="font-size: 12px; color: #94A3B8;">Sep 26 · Invoice #2291</div>
+                  <div class="receipt-name">Bean Brothers Imports</div>
+                  <div class="receipt-sub">Sep 26 · Invoice #2291</div>
                 </div>
               </div>
             </td>
-            <td><span style="color:#EA580C;">✦</span> Green coffee beans</td>
-            <td><span class="certainty-pill clean">96%</span></td>
-            <td style="font-family:'Fira Code', monospace; font-weight:700;">$8,640.00</td>
-            <td><span style="color:#94A3B8; cursor:pointer;">&gt;</span></td>
+            <td>
+              <div class="matched-cell">
+                <span class="matched-sparkle" aria-hidden="true">✦</span>
+                <span>Green coffee beans</span>
+              </div>
+            </td>
+            <td><span class="certainty-badge green">96%</span></td>
+            <td class="receipt-total">$8,640.00</td>
+            <td class="receipt-chevron" aria-hidden="true">&gt;</td>
           </tr>
-          <tr class="reconcile-row">
+          <tr class="receipt-row">
             <td>
-              <div style="font-weight: 700; color: #0F172A; display: flex; align-items: center; gap: 8px;">
-                <span>💳</span>
+              <div class="receipt-cell">
+                <span class="receipt-icon" aria-hidden="true">💳</span>
                 <div>
-                  <div>Uber Eats payout</div>
-                  <div style="font-size: 12px; color: #94A3B8;">Sep 24 · Weekly settlement</div>
+                  <div class="receipt-name">Uber Eats payout</div>
+                  <div class="receipt-sub">Sep 24 · Weekly settlement</div>
                 </div>
               </div>
             </td>
-            <td><span style="color:#EA580C;">✦</span> Delivery sales</td>
-            <td><span class="certainty-pill clean">88%</span></td>
-            <td style="font-family:'Fira Code', monospace; font-weight:700; color:#166534;">+$3,215.60</td>
-            <td><span style="color:#94A3B8; cursor:pointer;">&gt;</span></td>
+            <td>
+              <div class="matched-cell">
+                <span class="matched-sparkle" aria-hidden="true">✦</span>
+                <span>Delivery sales</span>
+              </div>
+            </td>
+            <td><span class="certainty-badge green">88%</span></td>
+            <td class="receipt-total green">+$3,215.60</td>
+            <td class="receipt-chevron" aria-hidden="true">&gt;</td>
           </tr>
-          <tr class="reconcile-row">
+          <tr class="receipt-row">
             <td>
-              <div style="font-weight: 700; color: #0F172A; display: flex; align-items: center; gap: 8px;">
-                <span>🔧</span>
+              <div class="receipt-cell">
+                <span class="receipt-icon" aria-hidden="true">🧾</span>
                 <div>
-                  <div>Hendrix Plumbing</div>
-                  <div style="font-size: 12px; color: #94A3B8;">Sep 21 · Card ••7710</div>
+                  <div class="receipt-name">Hendrix Plumbing</div>
+                  <div class="receipt-sub">Sep 21 · Card ••7710</div>
                 </div>
               </div>
             </td>
-            <td><span style="color:#EA580C;">✦</span> Equipment repair</td>
-            <td><span class="certainty-pill caution">54%</span></td>
-            <td style="font-family:'Fira Code', monospace; font-weight:700;">$780.00</td>
-            <td><span style="color:#94A3B8; cursor:pointer;">&gt;</span></td>
+            <td>
+              <div class="matched-cell">
+                <span class="matched-sparkle" aria-hidden="true">✦</span>
+                <span>Equipment repair</span>
+              </div>
+            </td>
+            <td><span class="certainty-badge peach">54%</span></td>
+            <td class="receipt-total">$780.00</td>
+            <td class="receipt-chevron" aria-hidden="true">&gt;</td>
           </tr>
-          <tr class="reconcile-row">
+          <tr class="receipt-row">
             <td>
-              <div style="font-weight: 700; color: #0F172A; display: flex; align-items: center; gap: 8px;">
-                <span>📦</span>
+              <div class="receipt-cell">
+                <span class="receipt-icon" aria-hidden="true">📦</span>
                 <div>
-                  <div>PrintPak Ltd</div>
-                  <div style="font-size: 12px; color: #94A3B8;">Sep 18 · Bank transfer</div>
+                  <div class="receipt-name">PrintPak Ltd</div>
+                  <div class="receipt-sub">Sep 18 · Bank transfer</div>
                 </div>
               </div>
             </td>
-            <td><span style="color:#EA580C;">✦</span> Packaging</td>
-            <td><span class="certainty-pill caution">71%</span></td>
-            <td style="font-family:'Fira Code', monospace; font-weight:700;">$2,310.00</td>
-            <td><span style="color:#94A3B8; cursor:pointer;">&gt;</span></td>
+            <td>
+              <div class="matched-cell">
+                <span class="matched-sparkle" aria-hidden="true">✦</span>
+                <span>Packaging</span>
+              </div>
+            </td>
+            <td><span class="certainty-badge peach">71%</span></td>
+            <td class="receipt-total">$2,310.00</td>
+            <td class="receipt-chevron" aria-hidden="true">&gt;</td>
           </tr>
         `;
       }
 
-      const copilotTitle = document.querySelector(".copilot-title-wrap span:nth-child(2)");
-      if (copilotTitle) copilotTitle.textContent = "Ask Quire";
-      const userBubble = document.querySelector(".copilot-bubble.user");
+      // Hide CareCircle clinical section
+      const clinicalSec = document.getElementById("carecircle-clinical-section");
+      if (clinicalSec) clinicalSec.style.display = "none";
+
+      // User Profile & Progress
+      const userTag = document.getElementById("user-avatar-tag");
+      if (userTag) userTag.textContent = "MI";
+      const userName = document.getElementById("user-display-name");
+      if (userName) userName.textContent = "Marco Ibe";
+      const userRole = document.getElementById("user-display-role");
+      if (userRole) userRole.textContent = "Finance lead";
+
+      const pTitle = document.getElementById("progress-card-title");
+      if (pTitle) pTitle.textContent = "September close";
+      const pPct = document.getElementById("progress-card-pct");
+      if (pPct) pPct.textContent = "64%";
+      const pBar = document.getElementById("progress-card-bar");
+      if (pBar) pBar.style.width = "64%";
+      const pSub = document.getElementById("progress-card-sub");
+      if (pSub) pSub.textContent = "9 of 14 tasks · 6 days left";
+
+      // Copilot
+      const copilotHeader = document.getElementById("copilot-header-name");
+      if (copilotHeader) copilotHeader.textContent = "Ask Quire";
+      const userBubble = document.getElementById("copilot-initial-user-query");
       if (userBubble) userBubble.textContent = "Which café is pulling our margin down?";
-      const stepPill = document.querySelector(".reasoning-step-pill span:nth-child(2)");
-      if (stepPill) stepPill.textContent = "Checked 312 receipts (3 steps ▾)";
-      const botText = document.querySelector(".copilot-bubble.bot p");
+      const stepPill = document.getElementById("copilot-steps-text");
+      if (stepPill) stepPill.textContent = "Checked 312 receipts";
+      const botText = document.getElementById("copilot-summary-p");
       if (botText) botText.textContent = "Harbor St ran at an 18% margin, about 11 points below your other cafés. Pricier oat milk and two extra weekend shifts explain most of the gap.";
 
-      const metricsMini = document.querySelector(".copilot-metrics-mini");
-      if (metricsMini) {
-        metricsMini.innerHTML = `
-          <div class="copilot-metric-box">
-            <div class="copilot-metric-box-val">34% <span style="font-size:11px; color:#166534;">+2 pts</span></div>
-            <div class="copilot-metric-box-lbl">Mill Road</div>
-          </div>
-          <div class="copilot-metric-box">
-            <div class="copilot-metric-box-val">31% <span style="font-size:11px; color:#166534;">+1 pt</span></div>
-            <div class="copilot-metric-box-lbl">Old Town</div>
-          </div>
-          <div class="copilot-metric-box">
-            <div class="copilot-metric-box-val">29% <span style="font-size:11px; color:#DC2626;">-1 pt</span></div>
-            <div class="copilot-metric-box-lbl">Riverside</div>
-          </div>
-          <div class="copilot-metric-box" style="background:#FFEDD5; border-color:#FDBA74;">
-            <div class="copilot-metric-box-val" style="color:#EA580C;">18% <span style="font-size:11px; color:#DC2626;">-9 pts</span></div>
-            <div class="copilot-metric-box-lbl" style="color:#C2410C;">Harbor St</div>
-          </div>
+      announce("Loaded Quire Live Dashboard dataset.");
+    } else {
+      // CareCircle Healthcare Mode
+      const orgIcon = document.getElementById("org-avatar-box");
+      if (orgIcon) orgIcon.textContent = "👵";
+      const orgName = document.getElementById("org-name-text");
+      if (orgName) orgName.textContent = "Rose Dawson";
+      const orgMeta = document.getElementById("org-meta-text");
+      if (orgMeta) orgMeta.textContent = "Age 82 · Cardiopulmonary";
+
+      const greeting = document.getElementById("quire-heading-greeting");
+      if (greeting) greeting.textContent = "Good morning, Sarah";
+      const dateRange = document.getElementById("quire-date-range");
+      if (dateRange) dateRange.textContent = "📅 Nov 1 – Nov 15, 2026";
+      const dateUpdated = document.getElementById("quire-date-updated-text");
+      if (dateUpdated) dateUpdated.textContent = "· Real-time Firestore Sync";
+
+      const seg0 = document.getElementById("seg-period-0");
+      const seg1 = document.getElementById("seg-period-1");
+      const seg2 = document.getElementById("seg-period-2");
+      if (seg0) { seg0.textContent = "Today"; seg0.classList.remove("active"); }
+      if (seg1) { seg1.textContent = "7 Days"; seg1.classList.add("active"); }
+      if (seg2) { seg2.textContent = "30 Days"; seg2.classList.remove("active"); }
+
+      const l0 = document.getElementById("kpi-label-0");
+      if (l0) l0.textContent = "Adherence Rate";
+      const v0 = document.getElementById("caretaker-adherence-stat");
+      if (v0) v0.textContent = "96.2%";
+      const b0 = document.getElementById("kpi-badge-0");
+      if (b0) { b0.className = "quire-badge-pct green"; b0.textContent = "+3.8% vs last wk"; }
+
+      const l1 = document.getElementById("kpi-label-1");
+      if (l1) l1.textContent = "Scheduled Doses";
+      const v1 = document.getElementById("caretaker-logged-stat");
+      if (v1) v1.textContent = "28 Doses";
+      const b1 = document.getElementById("kpi-badge-1");
+      if (b1) { b1.className = "quire-badge-pct green"; b1.textContent = "100% On-time"; }
+
+      const l2 = document.getElementById("kpi-label-2");
+      if (l2) l2.textContent = "Refills Needed";
+      const v2 = document.getElementById("caretaker-refills-stat");
+      if (v2) v2.textContent = "2 Low";
+      const b2 = document.getElementById("kpi-badge-2");
+      if (b2) { b2.className = "quire-badge-pct orange"; b2.textContent = "Order soon"; }
+
+      const l3 = document.getElementById("kpi-label-3");
+      if (l3) l3.textContent = "Escalation Alerts";
+      const v3 = document.getElementById("kpi-value-3");
+      if (v3) v3.textContent = "0 Active";
+      const b3 = document.getElementById("kpi-badge-3");
+      if (b3) { b3.className = "quire-badge-pct green"; b3.textContent = "All Clear"; }
+
+      const chartTitle = document.getElementById("chart-main-title");
+      if (chartTitle) chartTitle.textContent = "Adherence vs Timing";
+      const bTitle = document.getElementById("breakdown-card-title");
+      if (bTitle) bTitle.textContent = "Schedule by Window";
+      const bBadge = document.getElementById("breakdown-badge");
+      if (bBadge) bBadge.textContent = "4 Active";
+      const bTotal = document.getElementById("breakdown-card-total");
+      if (bTotal) bTotal.textContent = "4 Regimens";
+
+      const recTitle = document.getElementById("reconcile-card-title");
+      if (recTitle) recTitle.textContent = "Medications to Reconcile";
+      const recCount = document.getElementById("reconcile-badge-count");
+      if (recCount) recCount.textContent = "4";
+      const recDesc = document.getElementById("reconcile-desc-text");
+      if (recDesc) recDesc.textContent = "CareCircle matched all 4 regimens against clinical contraindications";
+      const recAction = document.getElementById("reconcile-action-btn");
+      if (recAction) recAction.innerHTML = `<span aria-hidden="true">✨</span> Reconcile All Confident`;
+
+      const tbody = document.getElementById("quire-reconcile-tbody");
+      if (tbody) {
+        tbody.innerHTML = `
+          <tr class="receipt-row">
+            <td>
+              <div class="receipt-cell">
+                <span class="receipt-icon" aria-hidden="true">💊</span>
+                <div>
+                  <div class="receipt-name">Metformin 500mg</div>
+                  <div class="receipt-sub">Oral tablet · Blue oval</div>
+                </div>
+              </div>
+            </td>
+            <td>
+              <div class="matched-cell">
+                <span class="matched-sparkle" aria-hidden="true">✦</span>
+                <span>Twice daily with meals (08:00, 20:00)</span>
+              </div>
+            </td>
+            <td><span class="certainty-badge green">98% Clean</span></td>
+            <td class="receipt-total">28 pills left</td>
+            <td class="receipt-chevron" aria-hidden="true">&gt;</td>
+          </tr>
+          <tr class="receipt-row">
+            <td>
+              <div class="receipt-cell">
+                <span class="receipt-icon" aria-hidden="true">💊</span>
+                <div>
+                  <div class="receipt-name">Lisinopril 10mg</div>
+                  <div class="receipt-sub">Oral tablet · Yellow round</div>
+                </div>
+              </div>
+            </td>
+            <td>
+              <div class="matched-cell">
+                <span class="matched-sparkle" aria-hidden="true">✦</span>
+                <span>Once daily in morning (08:00 with food)</span>
+              </div>
+            </td>
+            <td><span class="certainty-badge green">96% Clean</span></td>
+            <td class="receipt-total" style="color: #D97706;">6 pills left (Low)</td>
+            <td class="receipt-chevron" aria-hidden="true">&gt;</td>
+          </tr>
         `;
       }
 
-      const actions = document.querySelector(".copilot-actions");
-      if (actions) {
-        actions.innerHTML = `
-          <button type="button" class="copilot-action-btn" style="background:#000000; color:#FFFFFF;">👥 Rework Harbor St rota</button>
-          <button type="button" class="copilot-action-btn" style="background:#F1F5F9; color:#0F172A;">Share</button>
-        `;
-      }
-      announce("Loaded Quire Live Dashboard data.");
-    } else {
-      const orgWrap = document.querySelector(".patient-profile-card");
-      if (orgWrap) {
-        orgWrap.innerHTML = `
-          <div class="patient-avatar-wrap" aria-hidden="true">👵</div>
-          <div>
-            <div class="patient-meta-name">Rose Dawson</div>
-            <div class="patient-meta-sub">Age 82 · Cardiopulmonary</div>
-            <div style="margin-top: 4px;">
-              <span class="certainty-pill clean" style="font-size: 11px; padding: 2px 6px;">🟢 On Track</span>
-            </div>
-          </div>
-        `;
-      }
-      const title = document.querySelector(".quire-greeting-title");
-      if (title) title.textContent = "Good morning, Sarah";
-      const sub = document.querySelector(".quire-greeting-sub");
-      if (sub) sub.innerHTML = `📅 Nov 1 – Nov 15, 2026 · Real-time Firestore Sync`;
-      announce("Loaded CareCircle Healthcare data.");
+      // Show CareCircle clinical section
+      const clinicalSec = document.getElementById("carecircle-clinical-section");
+      if (clinicalSec) clinicalSec.style.display = "block";
+
+      const userTag = document.getElementById("user-avatar-tag");
+      if (userTag) userTag.textContent = "SJ";
+      const userName = document.getElementById("user-display-name");
+      if (userName) userName.textContent = "Sarah Jenkins, RN";
+      const userRole = document.getElementById("user-display-role");
+      if (userRole) userRole.textContent = "Lead Caregiver";
+
+      const pTitle = document.getElementById("progress-card-title");
+      if (pTitle) pTitle.textContent = "Weekly Care Plan";
+      const pPct = document.getElementById("progress-card-pct");
+      if (pPct) pPct.textContent = "94%";
+      const pBar = document.getElementById("progress-card-bar");
+      if (pBar) pBar.style.width = "94%";
+      const pSub = document.getElementById("progress-card-sub");
+      if (pSub) pSub.textContent = "16 of 17 doses logged on time";
+
+      const copilotHeader = document.getElementById("copilot-header-name");
+      if (copilotHeader) copilotHeader.textContent = "Ask CareCircle";
+      const userBubble = document.getElementById("copilot-initial-user-query");
+      if (userBubble) userBubble.textContent = "Which medication had delays this week?";
+      const stepPill = document.getElementById("copilot-steps-text");
+      if (stepPill) stepPill.textContent = "Checked 14 dose logs";
+      const botText = document.getElementById("copilot-summary-p");
+      if (botText) botText.textContent = "Lisinopril was snoozed once on Tuesday by 15 minutes because Rose was finishing breakfast. All other 13 doses were taken on schedule.";
+
+      announce("Loaded CareCircle Healthcare dataset.");
     }
+  }
   }
 
   function setPeriod(period) {
@@ -1705,7 +1858,7 @@ const CareApp = (() => {
   function registerServiceWorker() {
     if ("serviceWorker" in navigator) {
       window.addEventListener("load", () => {
-        navigator.serviceWorker.register("/sw.js?v=20261115-3").then((reg) => {
+        navigator.serviceWorker.register("/sw.js?v=20261115-5").then((reg) => {
           reg.update();
         }).catch((err) => {
           console.warn("ServiceWorker registration failed:", err);
@@ -1736,6 +1889,7 @@ const CareApp = (() => {
     try {
       await login(DEMO_CREDENTIALS.caretaker.id, DEMO_CREDENTIALS.caretaker.code);
       setRoleView("caretaker");
+      switchQuireDataMode("quire");
       await loadCaretakerData();
       await loadElderMeds();
       await loadElderAppts();

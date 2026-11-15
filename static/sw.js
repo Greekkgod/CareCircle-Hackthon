@@ -4,8 +4,8 @@
  * and caches today's medication schedule for resilient offline senior access.
  */
 
-const STATIC_CACHE = "carecircle-static-v4";
-const API_CACHE = "carecircle-api-v4";
+const STATIC_CACHE = "carecircle-static-v5";
+const API_CACHE = "carecircle-api-v5";
 
 const STATIC_ASSETS = [
   "/",
