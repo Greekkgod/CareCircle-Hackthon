@@ -293,8 +293,8 @@ sequenceDiagram
 
 ### 1. Clone & Set Up Environment
 ```bash
-git clone https://github.com/Greekkgod/PromptWars-x-Catalyst.git
-cd PromptWars-x-Catalyst
+git clone https://github.com/Greekkgod/CareCircle-Hackthon.git
+cd CareCircle-Hackthon
 
 # Create virtual environment with Python 3.12
 uv venv --python 3.12 .venv
@@ -359,7 +359,7 @@ vercel --prod
 ```
 
 #### Deploy via Vercel Web Dashboard (GitHub):
-1. Import `https://github.com/Greekkgod/PromptWars-x-Catalyst.git` on [vercel.com/new](https://vercel.com/new).
+1. Import `https://github.com/Greekkgod/CareCircle-Hackthon.git` on [vercel.com/new](https://vercel.com/new).
 2. Under **Environment Variables**, set `ENVIRONMENT=production`, `SECRET_KEY=...`, `GEMINI_API_KEY=...`, `CRON_SECRET=carecircle-internal-scheduler-secret-2026`, `USE_MOCK_FIRESTORE=true`.
 3. Click **Deploy**. Vercel will build and serve CareCircle on your `.vercel.app` domain.
 4. Vercel Cron automatically calls `/internal/run-reminders` with `Authorization: Bearer <CRON_SECRET>` to trigger the reminder ladder.
@@ -422,7 +422,7 @@ jobs:
 ## 📁 Repository Structure
 
 ```
-PromptWars-x-Catalyst/
+CareCircle-Hackthon/
 ├── .github/
 │   └── workflows/
 │       └── ci.yml               # GitHub Actions CI workflow (Ruff + Pytest)
