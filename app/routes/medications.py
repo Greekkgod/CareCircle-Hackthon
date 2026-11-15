@@ -43,6 +43,45 @@ async def get_medications(
     return medication_service.list_medications(target_elder)
 
 
+
+
+
+@router.get("/adherence", response_model=AdherenceStats)
+async def get_adherence(
+    elder_id: Optional[str] = None,
+    current_user: Dict[str, str] = Depends(require_roles(["elder", "caretaker", "family"])),
+) -> AdherenceStats:
+    """Retrieve adherence score and refill alert counts (Family read-only access)."""
+    target_elder = elder_id or current_user.get("elder_id", current_user["sub"])
+    return medication_service.compute_adherence(target_elder)
+
+
+@router.get("/logs", response_model=List[MedicationLog])
+async def get_medication_logs(
+    elder_id: Optional[str] = None,
+    limit: int = Query(default=20, ge=1, le=100),
+    current_user: Dict[str, str] = Depends(require_roles(["elder", "caretaker", "family"])),
+) -> List[MedicationLog]:
+    """Retrieve dose history logs (Family read-only access)."""
+    target_elder = elder_id or current_user.get("elder_id", current_user["sub"])
+    return medication_service.list_recent_logs(target_elder, limit=limit)
+
+
+@router.get("/{medication_id}", response_model=Medication)
+async def get_single_medication(
+    medication_id: str,
+    current_user: Dict[str, str] = Depends(require_roles(["elder", "caretaker", "family"])),
+) -> Medication:
+    """Retrieve a single medication by ID (Read CRUD)."""
+    med = medication_service.get_medication(medication_id)
+    if not med:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Medication '{medication_id}' not found.",
+        )
+    return med
+
+
 @router.post("/", response_model=Medication, status_code=status.HTTP_201_CREATED)
 async def add_medication(
     payload: MedicationCreate,
@@ -154,28 +193,15 @@ async def log_medication_dose(
     elder_id: Optional[str] = None,
     current_user: Dict[str, str] = Depends(require_roles(["elder", "caretaker"])),
 ) -> MedicationLog:
-    """Record a medication dose taken or missed."""
+    """Record a medication dose taken, missed, or snoozed."""
     target_elder = elder_id or current_user.get("elder_id", current_user["sub"])
     confirmed_by = current_user.get("name", current_user["sub"])
-    return medication_service.log_dose(target_elder, payload, confirmed_by=confirmed_by)
+    return medication_service.log_dose(
+        target_elder,
+        payload,
+        confirmed_by=confirmed_by,
+        actor_role=current_user["role"],
+    )
 
 
-@router.get("/adherence", response_model=AdherenceStats)
-async def get_adherence(
-    elder_id: Optional[str] = None,
-    current_user: Dict[str, str] = Depends(require_roles(["elder", "caretaker", "family"])),
-) -> AdherenceStats:
-    """Retrieve adherence score and refill alert counts (Family read-only access)."""
-    target_elder = elder_id or current_user.get("elder_id", current_user["sub"])
-    return medication_service.compute_adherence(target_elder)
 
-
-@router.get("/logs", response_model=List[MedicationLog])
-async def get_medication_logs(
-    elder_id: Optional[str] = None,
-    limit: int = Query(default=20, ge=1, le=100),
-    current_user: Dict[str, str] = Depends(require_roles(["elder", "caretaker", "family"])),
-) -> List[MedicationLog]:
-    """Retrieve dose history logs (Family read-only access)."""
-    target_elder = elder_id or current_user.get("elder_id", current_user["sub"])
-    return medication_service.list_recent_logs(target_elder, limit=limit)

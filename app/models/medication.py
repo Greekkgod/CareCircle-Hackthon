@@ -12,6 +12,7 @@ class DoseStatus(str, Enum):
     TAKEN = "TAKEN"
     MISSED = "MISSED"
     SKIPPED = "SKIPPED"
+    SNOOZED = "SNOOZED"
 
 
 class MedicationCreate(BaseModel):
@@ -41,13 +42,14 @@ class Medication(MedicationCreate):
 
 
 class DoseLogCreate(BaseModel):
-    """Payload when recording a taken or missed dose."""
+    """Payload when recording a taken, missed, or snoozed dose."""
 
     medication_id: str
     medication_name: str
     scheduled_time: str
     status: DoseStatus = DoseStatus.TAKEN
     notes: Optional[str] = Field(default=None, max_length=300)
+    snooze_until: Optional[str] = Field(default=None, description="ISO timestamp or reminder time when snoozed")
 
 
 class DoseLog(DoseLogCreate):
@@ -73,11 +75,14 @@ MedicationLogCreate = DoseLogCreate
 
 
 class AdherenceStats(BaseModel):
-    """Adherence analytics for an elder."""
+    """Adherence analytics and streak metrics for an elder."""
 
     elder_id: str
     total_logged: int
     taken_count: int
     missed_count: int
+    snoozed_count: int = 0
     adherence_percentage: float
+    current_streak_days: int = 0
+    longest_streak_days: int = 0
     needs_refill_count: int

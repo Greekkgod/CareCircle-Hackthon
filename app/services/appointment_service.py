@@ -18,6 +18,12 @@ def list_appointments(elder_id: str) -> List[Appointment]:
     return [Appointment(**rec) for rec in records]
 
 
+def get_appointment(appointment_id: str) -> Optional[Appointment]:
+    """Retrieve an appointment by ID."""
+    rec = db.get("appointments", appointment_id)
+    return Appointment(**rec) if rec else None
+
+
 def create_appointment(elder_id: str, payload: AppointmentCreate) -> Appointment:
     """Create a new confirmed appointment for an elder."""
     appt_id = f"appt_{uuid.uuid4().hex[:8]}"
@@ -37,3 +43,8 @@ def update_status(appointment_id: str, new_status: AppointmentStatus) -> Optiona
     """Update appointment status (CONFIRMED, COMPLETED, CANCELLED)."""
     updated = db.update("appointments", appointment_id, {"status": new_status.value})
     return Appointment(**updated) if updated else None
+
+
+def delete_appointment(appointment_id: str) -> bool:
+    """Delete an appointment."""
+    return db.delete("appointments", appointment_id)

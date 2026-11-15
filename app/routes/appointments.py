@@ -36,6 +36,21 @@ async def get_appointments(
     return appointment_service.list_appointments(target_elder)
 
 
+@router.get("/{appointment_id}", response_model=Appointment)
+async def get_single_appointment(
+    appointment_id: str,
+    current_user: Dict[str, str] = Depends(require_roles(["elder", "caretaker", "family"])),
+) -> Appointment:
+    """Retrieve a single appointment by ID (Read CRUD)."""
+    appt = appointment_service.get_appointment(appointment_id)
+    if not appt:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Appointment '{appointment_id}' not found.",
+        )
+    return appt
+
+
 @router.post("/", response_model=Appointment, status_code=status.HTTP_201_CREATED)
 async def add_appointment(
     payload: AppointmentCreate,
