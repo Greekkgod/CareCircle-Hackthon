@@ -406,12 +406,20 @@ def test_cloud_scheduler_endpoint_authorized():
     assert data["status"] == "success"
     assert "processed_elders" in data
 
-    # Bearer Authorization Header
+    # Bearer Authorization Header with POST
     resp_bearer = client.post(
         "/internal/run-reminders?dry_run=true",
         headers={"Authorization": f"Bearer {settings.cron_secret}"},
     )
     assert resp_bearer.status_code == 200
+
+    # Vercel Cron invocations use GET method with Bearer token
+    resp_vercel_cron = client.get(
+        "/internal/run-reminders?dry_run=true",
+        headers={"Authorization": f"Bearer {settings.cron_secret}"},
+    )
+    assert resp_vercel_cron.status_code == 200
+    assert resp_vercel_cron.json()["status"] == "success"
 
 
 # -------------------------------------------------------------------------

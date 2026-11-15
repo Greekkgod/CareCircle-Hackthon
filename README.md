@@ -4,6 +4,7 @@
 
 [![Python 3.12](https://img.shields.io/badge/Python-3.12-blue.svg)](https://www.python.org/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.115+-009688.svg)](https://fastapi.tiangolo.com)
+[![Vercel Deployment](https://img.shields.io/badge/Deploy-Vercel-black?logo=vercel)](https://vercel.com)
 [![Google Cloud Firestore](https://img.shields.io/badge/Google%20Cloud-Firestore-orange.svg)](https://cloud.google.com/firestore)
 [![Gemini 1.5 Flash](https://img.shields.io/badge/Google-Gemini%201.5%20Flash-4285F4.svg)](https://ai.google.dev/)
 [![WCAG AAA](https://img.shields.io/badge/Accessibility-WCAG%20AAA-green.svg)](https://www.w3.org/WAI/standards-guidelines/wcag/)
@@ -336,6 +337,32 @@ docker build -t carecircle:latest .
 # Run the container
 docker run -p 8000:8000 --env-file .env carecircle:latest
 ```
+
+### 5. Deploying to Vercel (Serverless)
+CareCircle includes full native support for **Vercel** serverless deployment via `@vercel/python`:
+
+#### Deploy via Vercel CLI:
+```bash
+# 1. Install CLI & authenticate
+npm install -g vercel
+vercel login
+
+# 2. Add environment variables
+vercel env add ENVIRONMENT production        # value: production
+vercel env add SECRET_KEY production         # value: your-32char-secret-key
+vercel env add GEMINI_API_KEY production     # value: your-gemini-key-or-mock
+vercel env add CRON_SECRET production       # value: carecircle-internal-scheduler-secret-2026
+vercel env add USE_MOCK_FIRESTORE production # value: true (or false with GCP project)
+
+# 3. Deploy to production
+vercel --prod
+```
+
+#### Deploy via Vercel Web Dashboard (GitHub):
+1. Import `https://github.com/Greekkgod/PromptWars-x-Catalyst.git` on [vercel.com/new](https://vercel.com/new).
+2. Under **Environment Variables**, set `ENVIRONMENT=production`, `SECRET_KEY=...`, `GEMINI_API_KEY=...`, `CRON_SECRET=carecircle-internal-scheduler-secret-2026`, `USE_MOCK_FIRESTORE=true`.
+3. Click **Deploy**. Vercel will build and serve CareCircle on your `.vercel.app` domain.
+4. Vercel Cron automatically calls `/internal/run-reminders` with `Authorization: Bearer <CRON_SECRET>` to trigger the reminder ladder.
 
 ---
 

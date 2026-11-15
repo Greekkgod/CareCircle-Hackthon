@@ -55,11 +55,12 @@ def verify_scheduler_secret(
 
 
 # -------------------------------------------------------------------------
-# Protected Cloud Scheduler Endpoint
+# Protected Cloud Scheduler & Vercel Cron Endpoint
 # -------------------------------------------------------------------------
-@router.post(
+@router.api_route(
     "/internal/run-reminders",
-    summary="Trigger reminder & escalation cycle (Protected for Cloud Scheduler)",
+    methods=["GET", "POST"],
+    summary="Trigger reminder & escalation cycle (Protected for Cloud Scheduler & Vercel Cron)",
 )
 async def trigger_run_reminders(
     dry_run: bool = Query(default=False, description="Preview actions without writing sent logs"),
