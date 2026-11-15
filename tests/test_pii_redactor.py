@@ -82,3 +82,14 @@ def test_combined_pii_redaction_pipeline():
     assert "555-321-7654" not in res.redacted_text
     # Clinical prescription details MUST remain intact
     assert "Lisinopril 20mg once daily in morning" in res.redacted_text
+
+
+def test_contextual_roster_name_redaction():
+    """Verify known patient and family member names are redacted even without 'Patient:' prefix."""
+    raw = "Give Rose Dawson her evening pills and call David if she feels dizzy."
+    res = redact_pii(raw, known_names=["Rose Dawson", "David"])
+
+    assert "Rose Dawson" not in res.redacted_text
+    assert "David" not in res.redacted_text
+    assert "[REDACTED_NAME]" in res.redacted_text
+    assert res.categories.get("known_names") == 2

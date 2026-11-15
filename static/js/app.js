@@ -53,6 +53,31 @@ const CareApp = (() => {
   }
 
   /**
+   * Senior tactile haptic feedback using Web Vibration API.
+   * Provides reassuring physical confirmation for seniors with neuropathy or tremors.
+   */
+  function triggerHaptic(duration = 40) {
+    if (typeof navigator !== "undefined" && "vibrate" in navigator) {
+      try {
+        navigator.vibrate(duration);
+      } catch (e) {
+        // Ignored if device does not support vibration
+      }
+    }
+  }
+
+  /**
+   * Create SpeechSynthesisUtterance calibrated for senior auditory processing (presbycusis).
+   * 15% slower rate (0.85) and slightly deeper pitch (0.92) for maximum intelligibility.
+   */
+  function createSeniorUtterance(text) {
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.rate = 0.85;
+    utterance.pitch = 0.92;
+    return utterance;
+  }
+
+  /**
    * Helper for authenticated API calls with offline cache fallback.
    */
   async function apiFetch(endpoint, options = {}) {
@@ -329,7 +354,7 @@ const CareApp = (() => {
         : "You declined the change. Your current plan stays the same.";
       announce(msg, "success");
       if ("speechSynthesis" in window) {
-        window.speechSynthesis.speak(new SpeechSynthesisUtterance(msg));
+        window.speechSynthesis.speak(createSeniorUtterance(msg));
       }
       await loadElderConsentCards();
       await loadElderMeds();
@@ -426,6 +451,7 @@ const CareApp = (() => {
    * Action for Huge "I TOOK IT" button.
    */
   async function takeNextDose() {
+    triggerHaptic(50);
     if (!state.nextDose) return;
     const med = state.nextDose.medication;
     const time = state.nextDose.slotTime;
@@ -445,7 +471,7 @@ const CareApp = (() => {
       if ("speechSynthesis" in window) {
         window.speechSynthesis.cancel();
         window.speechSynthesis.speak(
-          new SpeechSynthesisUtterance(`Thank you Rose! Logged ${med.name} as taken.`)
+          createSeniorUtterance(`Thank you Rose! Logged ${med.name} as taken.`)
         );
       }
       await loadElderMeds();
@@ -464,6 +490,7 @@ const CareApp = (() => {
    * Action for Snooze button (15 minutes).
    */
   async function snoozeNextDose() {
+    triggerHaptic(40);
     if (!state.nextDose) return;
     const med = state.nextDose.medication;
     const time = state.nextDose.slotTime;
@@ -485,7 +512,7 @@ const CareApp = (() => {
       if ("speechSynthesis" in window) {
         window.speechSynthesis.cancel();
         window.speechSynthesis.speak(
-          new SpeechSynthesisUtterance(`Snoozed for 15 minutes.`)
+          createSeniorUtterance(`Snoozed for 15 minutes.`)
         );
       }
     } catch (err) {
@@ -497,6 +524,7 @@ const CareApp = (() => {
    * Read the Next Dose instructions aloud via Web Speech API.
    */
   function readNextDoseAloud() {
+    triggerHaptic(30);
     if (!("speechSynthesis" in window)) {
       announce("Audio readout is not supported in this browser.", "alert");
       return;
@@ -511,9 +539,7 @@ const CareApp = (() => {
     const speech = `It is time for your ${med.name}, ${med.dosage}. Scheduled for ${time}. ${med.instructions}. Please tap the big green button after you take it.`;
 
     window.speechSynthesis.cancel();
-    const utterance = new SpeechSynthesisUtterance(speech);
-    utterance.rate = 0.9;
-    utterance.pitch = 1.0;
+    const utterance = createSeniorUtterance(speech);
     window.speechSynthesis.speak(utterance);
     announce("Reading your dose instructions aloud.", "info");
   }
@@ -676,7 +702,7 @@ const CareApp = (() => {
     }
 
     if (state.medications.length === 0) {
-      window.speechSynthesis.speak(new SpeechSynthesisUtterance("You have no medications scheduled right now. Have a lovely day!"));
+      window.speechSynthesis.speak(createSeniorUtterance("You have no medications scheduled right now. Have a lovely day!"));
       return;
     }
 
@@ -690,9 +716,7 @@ const CareApp = (() => {
     }
 
     window.speechSynthesis.cancel();
-    const utterance = new SpeechSynthesisUtterance(speechText);
-    utterance.rate = 0.9;
-    utterance.pitch = 1.0;
+    const utterance = createSeniorUtterance(speechText);
     window.speechSynthesis.speak(utterance);
     announce("Reading your medication schedule aloud.", "info");
   }
@@ -701,6 +725,7 @@ const CareApp = (() => {
    * Record pill taken.
    */
   async function takePill(medId, medName) {
+    triggerHaptic(50);
     try {
       await apiFetch("/api/medications/log", {
         method: "POST",
@@ -713,7 +738,7 @@ const CareApp = (() => {
       });
       announce(`Great job! You logged ${medName} as taken.`, "success");
       if ("speechSynthesis" in window) {
-        window.speechSynthesis.speak(new SpeechSynthesisUtterance(`Thank you Rose! Logged ${medName} as taken.`));
+        window.speechSynthesis.speak(createSeniorUtterance(`Thank you Rose! Logged ${medName} as taken.`));
       }
       await loadElderMeds();
     } catch (err) {
@@ -725,6 +750,7 @@ const CareApp = (() => {
    * Record mood check-in.
    */
   async function submitCheckin(mood) {
+    triggerHaptic(40);
     try {
       await apiFetch("/api/checkins/", {
         method: "POST",
@@ -737,7 +763,7 @@ const CareApp = (() => {
       };
       announce(labels[mood] || "Check-in recorded.", "success");
       if ("speechSynthesis" in window) {
-        window.speechSynthesis.speak(new SpeechSynthesisUtterance(labels[mood]));
+        window.speechSynthesis.speak(createSeniorUtterance(labels[mood]));
       }
     } catch (err) {
       announce(err.message, "alert");
@@ -748,6 +774,7 @@ const CareApp = (() => {
    * Emergency SOS trigger.
    */
   async function triggerSOS() {
+    triggerHaptic(100);
     try {
       await apiFetch("/api/checkins/sos", {
         method: "POST",
@@ -756,7 +783,7 @@ const CareApp = (() => {
       announce("EMERGENCY ALERT SENT! Help is on the way. Caretaker and family notified.", "alert");
       if ("speechSynthesis" in window) {
         window.speechSynthesis.speak(
-          new SpeechSynthesisUtterance("Emergency alert sent. Help has been notified. Please stay calm.")
+          createSeniorUtterance("Emergency alert sent. Help has been notified. Please stay calm.")
         );
       }
     } catch (err) {
@@ -925,8 +952,7 @@ const CareApp = (() => {
     const speech = `Here is why you take ${medBadge}. ${explanation}. Daily tip: ${tip}. Remember to confirm all questions with your doctor or pharmacist.`;
 
     window.speechSynthesis.cancel();
-    const u = new SpeechSynthesisUtterance(speech);
-    u.rate = 0.9;
+    const u = createSeniorUtterance(speech);
     window.speechSynthesis.speak(u);
   }
 

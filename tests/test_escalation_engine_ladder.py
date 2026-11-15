@@ -459,3 +459,40 @@ def test_simulation_simulate_time_endpoint():
     # Reset clock
     reset_resp = client.post("/api/simulation/reset-clock")
     assert reset_resp.status_code == 200
+
+
+def test_multi_contact_fan_out_escalation():
+    """Verify that Level 2 and Level 3 escalations fan out to all registered contacts."""
+    elder = {"id": "elder_1", "name": "Rose Dawson", "email": "rose@carecircle.demo"}
+    medications = [
+        {"id": "med_1", "name": "Coreg", "dosage": "25mg", "schedule_times": ["08:00"], "is_active": True}
+    ]
+    members = [
+        {"role": "elder", "name": "Rose Dawson", "email": "rose@carecircle.demo"},
+        {"role": "caretaker", "name": "Nurse Sarah", "email": "sarah@carecircle.demo"},
+        {"role": "caretaker", "name": "Nurse John", "email": "john@carecircle.demo"},
+        {"role": "family", "name": "David (Son)", "email": "david@family.demo"},
+        {"role": "family", "name": "Susan (Daughter)", "email": "susan@family.demo"},
+    ]
+    config = EscalationConfig(elder_grace_minutes=0, caretaker_delay_minutes=15, family_delay_minutes=30)
+
+    # At 08:35 (+35 min overdue), both Caretaker and Family levels are active
+    time_0835 = datetime(2026, 11, 15, 8, 35, 0, tzinfo=timezone.utc)
+    immediates, _, _ = evaluate_escalation_cycle(
+        current_time=time_0835,
+        elder=elder,
+        medications=medications,
+        dose_logs=[],
+        members=members,
+        sent_idempotency_keys=set(),
+        config=config,
+    )
+
+    # Elder (1) + Caretakers (2) + Family (2) = 5 total notifications fanned out
+    recipients = [n.recipient_email for n in immediates]
+    assert "rose@carecircle.demo" in recipients
+    assert "sarah@carecircle.demo" in recipients
+    assert "john@carecircle.demo" in recipients
+    assert "david@family.demo" in recipients
+    assert "susan@family.demo" in recipients
+    assert len(immediates) == 5

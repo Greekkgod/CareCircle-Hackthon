@@ -208,3 +208,30 @@ def test_mocking_gemini_in_tests():
             assert drafts[0].proposed_data["name"] == "MockPill"
             assert drafts[0].status == DraftStatus.PENDING_CONFIRMATION
             assert "doctor or pharmacist" in drafts[0].medical_disclaimer.lower()
+
+
+def test_drug_drug_interaction_warning_attached_to_draft():
+    """Verify that drafting a contraindicated medication flags a clinical interaction warning."""
+    # Seed active Lisinopril for elder_1
+    db.set("medications", "med_lisinopril", {
+        "id": "med_lisinopril",
+        "elder_id": "elder_1",
+        "name": "Lisinopril",
+        "dosage": "20mg",
+        "is_active": True,
+    })
+
+    # Caregiver dictates Spironolactone (known hyperkalemia risk with ACE inhibitors)
+    drafts = parse_natural_language_voice_to_drafts(
+        "Please add Spironolactone 25mg daily for fluid retention",
+        elder_id="elder_1",
+    )
+
+    med_drafts = [d for d in drafts if d.draft_type == DraftType.MEDICATION]
+    assert len(med_drafts) >= 1
+    spiro_draft = med_drafts[0]
+
+    # Verify interaction warning is attached
+    assert "interaction_warning" in spiro_draft.proposed_data
+    assert "hyperkalemia" in spiro_draft.proposed_data["interaction_warning"].lower()
+    assert "ALERT" in spiro_draft.reasoning

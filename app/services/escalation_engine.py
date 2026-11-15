@@ -55,6 +55,12 @@ def find_active_member(members: List[Dict[str, Any]], role: MemberRole) -> Optio
     return None
 
 
+def find_all_active_members(members: List[Dict[str, Any]], role: MemberRole) -> List[Dict[str, Any]]:
+    """Locate all active members matching the specified role for fan-out dispatch."""
+    target_role = role.value if isinstance(role, MemberRole) else str(role)
+    return [m for m in members if m.get("role") == target_role and m.get("email")]
+
+
 def is_dose_resolved_or_snoozed(
     medication_id: str,
     scheduled_slot: str,
@@ -131,16 +137,21 @@ def evaluate_escalation_cycle(
         "email": elder.get("email") or f"{elder_name.lower().replace(' ', '')}@example.com",
         "role": MemberRole.ELDER.value,
     }
-    caretaker_member = find_active_member(members, MemberRole.CARETAKER) or {
-        "name": "Primary Caretaker",
-        "email": "caretaker@example.com",
-        "role": MemberRole.CARETAKER.value,
-    }
-    family_member = find_active_member(members, MemberRole.FAMILY) or {
-        "name": "Family Contact",
-        "email": "family@example.com",
-        "role": MemberRole.FAMILY.value,
-    }
+    caretaker_members = find_all_active_members(members, MemberRole.CARETAKER)
+    if not caretaker_members:
+        caretaker_members = [{
+            "name": "Primary Caretaker",
+            "email": "caretaker@example.com",
+            "role": MemberRole.CARETAKER.value,
+        }]
+
+    family_members = find_all_active_members(members, MemberRole.FAMILY)
+    if not family_members:
+        family_members = [{
+            "name": "Family Contact",
+            "email": "family@example.com",
+            "role": MemberRole.FAMILY.value,
+        }]
 
     in_quiet_hours = config.quiet_hours.is_quiet_hour(current_time)
 
@@ -220,12 +231,8 @@ def evaluate_escalation_cycle(
                         )
                     )
 
-            # --- Escalation Level 2: Caretaker Alert ---
-            caretaker_key = f"escalation:{elder_id}:{med_id}:{date_str}:{slot}:caretaker"
-            if (
-                elapsed_minutes >= config.caretaker_delay_minutes
-                and caretaker_key not in sent_idempotency_keys
-            ):
+            # --- Escalation Level 2: Caretaker Alert (Fan-out to all registered caretakers) ---
+            if elapsed_minutes >= config.caretaker_delay_minutes:
                 subject = f"Alert: {elder_name} has not confirmed {med_name} ({int(elapsed_minutes)}m overdue)"
                 body = (
                     f"Caregiver Alert:\n\n"
@@ -233,52 +240,64 @@ def evaluate_escalation_cycle(
                     f"It is now {int(elapsed_minutes)} minutes past due and no confirmation has been recorded.\n\n"
                     f"Please check in with {elder_name} or update their CareCircle log."
                 )
-                immediate_notifications.append(
-                    PendingNotification(
-                        idempotency_key=caretaker_key,
-                        elder_id=elder_id,
-                        medication_id=med_id,
-                        medication_name=med_name,
-                        scheduled_time=slot,
-                        escalation_level=EscalationLevel.CARETAKER,
-                        recipient_role=MemberRole.CARETAKER.value,
-                        recipient_name=caretaker_member.get("name", "Caretaker"),
-                        recipient_email=caretaker_member.get("email", ""),
-                        subject=subject,
-                        body=body,
-                        priority=AlertPriority.HIGH,
-                    )
-                )
+                for cm in caretaker_members:
+                    cm_email = cm.get("email", "")
+                    if len(caretaker_members) == 1:
+                        caretaker_key = f"escalation:{elder_id}:{med_id}:{date_str}:{slot}:caretaker"
+                    else:
+                        caretaker_key = f"escalation:{elder_id}:{med_id}:{date_str}:{slot}:caretaker:{cm_email}"
 
-            # --- Escalation Level 3: Family Escalation ---
-            family_key = f"escalation:{elder_id}:{med_id}:{date_str}:{slot}:family"
-            if (
-                elapsed_minutes >= config.family_delay_minutes
-                and family_key not in sent_idempotency_keys
-            ):
-                subject = f"CareCircle Notice: Overdue medication for {elder_name}"
-                body = (
-                    f"Hello {family_member.get('name', 'Family')},\n\n"
-                    f"{elder_name}'s scheduled dose of {med_name} ({dosage}) at {slot} is "
-                    f"{int(elapsed_minutes)} minutes overdue.\n"
-                    f"The care team has been notified. This notice is sent to keep the family informed."
-                )
-                immediate_notifications.append(
-                    PendingNotification(
-                        idempotency_key=family_key,
-                        elder_id=elder_id,
-                        medication_id=med_id,
-                        medication_name=med_name,
-                        scheduled_time=slot,
-                        escalation_level=EscalationLevel.FAMILY,
-                        recipient_role=MemberRole.FAMILY.value,
-                        recipient_name=family_member.get("name", "Family"),
-                        recipient_email=family_member.get("email", ""),
-                        subject=subject,
-                        body=body,
-                        priority=AlertPriority.HIGH,
-                    )
-                )
+                    if caretaker_key not in sent_idempotency_keys:
+                        immediate_notifications.append(
+                            PendingNotification(
+                                idempotency_key=caretaker_key,
+                                elder_id=elder_id,
+                                medication_id=med_id,
+                                medication_name=med_name,
+                                scheduled_time=slot,
+                                escalation_level=EscalationLevel.CARETAKER,
+                                recipient_role=MemberRole.CARETAKER.value,
+                                recipient_name=cm.get("name", "Caretaker"),
+                                recipient_email=cm_email,
+                                subject=subject,
+                                body=body,
+                                priority=AlertPriority.HIGH,
+                            )
+                        )
+
+            # --- Escalation Level 3: Family Escalation (Fan-out to all registered family members) ---
+            if elapsed_minutes >= config.family_delay_minutes:
+                for fm in family_members:
+                    fm_email = fm.get("email", "")
+                    if len(family_members) == 1:
+                        family_key = f"escalation:{elder_id}:{med_id}:{date_str}:{slot}:family"
+                    else:
+                        family_key = f"escalation:{elder_id}:{med_id}:{date_str}:{slot}:family:{fm_email}"
+
+                    if family_key not in sent_idempotency_keys:
+                        subject = f"CareCircle Notice: Overdue medication for {elder_name}"
+                        body = (
+                            f"Hello {fm.get('name', 'Family')},\n\n"
+                            f"{elder_name}'s scheduled dose of {med_name} ({dosage}) at {slot} is "
+                            f"{int(elapsed_minutes)} minutes overdue.\n"
+                            f"The care team has been notified. This notice is sent to keep the family informed."
+                        )
+                        immediate_notifications.append(
+                            PendingNotification(
+                                idempotency_key=family_key,
+                                elder_id=elder_id,
+                                medication_id=med_id,
+                                medication_name=med_name,
+                                scheduled_time=slot,
+                                escalation_level=EscalationLevel.FAMILY,
+                                recipient_role=MemberRole.FAMILY.value,
+                                recipient_name=fm.get("name", "Family"),
+                                recipient_email=fm_email,
+                                subject=subject,
+                                body=body,
+                                priority=AlertPriority.HIGH,
+                            )
+                        )
 
     # 2. Process Additional Low-Priority Alerts (Refills / Check-ins)
     if additional_alerts:
@@ -295,7 +314,7 @@ def evaluate_escalation_cycle(
                         id=alert_key,
                         elder_id=elder_id,
                         recipient_role=alert.get("recipient_role", MemberRole.FAMILY.value),
-                        recipient_email=alert.get("recipient_email", family_member.get("email", "")),
+                        recipient_email=alert.get("recipient_email", family_members[0].get("email", "")),
                         medication_name=alert.get("medication_name", "General Update"),
                         scheduled_time=alert.get("scheduled_time", "N/A"),
                         reason=alert.get("reason", "Low-priority alert queued during quiet hours"),

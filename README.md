@@ -9,7 +9,7 @@
 [![Gemini 1.5 Flash](https://img.shields.io/badge/Google-Gemini%201.5%20Flash-4285F4.svg)](https://ai.google.dev/)
 [![WCAG AAA](https://img.shields.io/badge/Accessibility-WCAG%20AAA-green.svg)](https://www.w3.org/WAI/standards-guidelines/wcag/)
 [![CI Status](https://img.shields.io/badge/CI-GitHub%20Actions-brightgreen.svg)]()
-[![Tests](https://img.shields.io/badge/pytest-69%20passed-brightgreen.svg)]()
+[![Tests](https://img.shields.io/badge/pytest-72%20passed-brightgreen.svg)]()
 [![Code Style](https://img.shields.io/badge/code%20style-ruff-000000.svg)](https://github.com/astral-sh/ruff)
 
 ---
@@ -369,7 +369,7 @@ vercel --prod
 ## 🧪 Running Tests & Linting
 
 ### Run the Pytest Test Suite
-CareCircle includes **69 unit and integration tests** covering all features:
+CareCircle includes **72 unit and integration tests** covering all features:
 ```bash
 pytest -v
 ```

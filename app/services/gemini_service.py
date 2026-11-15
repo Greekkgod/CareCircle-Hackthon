@@ -95,6 +95,67 @@ Return ONLY valid JSON matching this schema:
 }
 """
 
+# Built-in high-risk clinical drug-drug interactions for geriatric safety
+DDI_RULES = [
+    {
+        "drugs": ("lisinopril", "spironolactone"),
+        "warning": "Risk of severe hyperkalemia when combining ACE inhibitors (Lisinopril) and potassium-sparing diuretics (Spironolactone). Monitor serum potassium.",
+    },
+    {
+        "drugs": ("lisinopril", "potassium"),
+        "warning": "Risk of hyperkalemia combining ACE inhibitors and potassium supplements.",
+    },
+    {
+        "drugs": ("warfarin", "aspirin"),
+        "warning": "Elevated hemorrhage and gastrointestinal bleeding risk when combining Warfarin with Aspirin or NSAIDs.",
+    },
+    {
+        "drugs": ("warfarin", "ibuprofen"),
+        "warning": "Major bleeding risk combining anticoagulant (Warfarin) with NSAID (Ibuprofen).",
+    },
+    {
+        "drugs": ("metformin", "topiramate"),
+        "warning": "Increased risk of lactic acidosis or hypoglycemia.",
+    },
+    {
+        "drugs": ("levothyroxine", "omeprazole"),
+        "warning": "Omeprazole decreases stomach acidity, potentially reducing Levothyroxine absorption. Separate administration by at least 4 hours.",
+    },
+    {
+        "drugs": ("amlodipine", "simvastatin"),
+        "warning": "Amlodipine increases Simvastatin exposure, raising risk of myopathy/rhabdomyolysis. Limit Simvastatin to 20mg daily.",
+    },
+]
+
+
+def check_drug_interactions(new_med_name: str, elder_id: str) -> Optional[str]:
+    """Check if proposed medication interacts with any of the elder's active medications.
+
+    Args:
+        new_med_name: Name of the proposed medication.
+        elder_id: Target elder ID.
+
+    Returns:
+        Warning message string if interaction detected, None otherwise.
+    """
+    if not new_med_name or not elder_id:
+        return None
+    active_meds = db.list("medications", filters=[("elder_id", "==", elder_id), ("is_active", "==", True)])
+    new_lower = new_med_name.lower()
+
+    warnings: List[str] = []
+    for med in active_meds:
+        existing_lower = med.get("name", "").lower()
+        for rule in DDI_RULES:
+            drug_a, drug_b = rule["drugs"]
+            if (drug_a in new_lower and drug_b in existing_lower) or (drug_b in new_lower and drug_a in existing_lower):
+                warnings.append(rule["warning"])
+
+    if warnings:
+        return " | ".join(warnings)
+    return None
+
+
 # Built-in clinical explanations for senior medications
 COMMON_MEDICATION_EXPLANATIONS: Dict[str, Dict[str, str]] = {
     "metformin": {
@@ -279,6 +340,13 @@ def parse_prescription_photo_to_drafts(
 
     created_drafts: List[AIDraft] = []
     for med in extracted_meds:
+        # Check clinical drug-drug interactions against active regimens
+        interaction_warning = check_drug_interactions(med.get("name", ""), elder_id)
+        if interaction_warning:
+            med["interaction_warning"] = interaction_warning
+            base_reasoning = med.get("reasoning", "Extracted from prescription image")
+            med["reasoning"] = f"{base_reasoning} [ALERT: {interaction_warning}]".strip()
+
         draft_id = f"draft_photo_{uuid.uuid4().hex[:8]}"
         draft = AIDraft(
             id=draft_id,
@@ -309,8 +377,21 @@ def parse_natural_language_voice_to_drafts(
     elder_id: str = "elder_1",
 ) -> List[AIDraft]:
     """Parse conversational speech transcripts or freeform text with PII redaction."""
-    # 1. Strict PII redaction prior to LLM interaction
-    redacted_info = redact_pii(raw_text)
+    # 1. Fetch roster names for contextual patient/member PII scrubbing
+    known_names: List[str] = []
+    elder_profile = db.get("elder_profiles", elder_id)
+    if elder_profile and elder_profile.get("name"):
+        known_names.append(elder_profile["name"])
+        for part in elder_profile["name"].split():
+            if len(part) >= 3:
+                known_names.append(part)
+    members = db.list("members", filters=[("elder_id", "==", elder_id)])
+    for m in members:
+        if m.get("name"):
+            known_names.append(m["name"])
+
+    # 2. Strict PII redaction prior to LLM interaction
+    redacted_info = redact_pii(raw_text, known_names=known_names)
     sanitized_text = redacted_info.redacted_text
 
     extracted: Dict[str, List[Dict[str, Any]]] = {}
@@ -340,6 +421,13 @@ def parse_natural_language_voice_to_drafts(
 
     # Create medication drafts
     for med in extracted.get("medications", []):
+        # Check clinical drug-drug interactions against active regimens
+        interaction_warning = check_drug_interactions(med.get("name", ""), elder_id)
+        if interaction_warning:
+            med["interaction_warning"] = interaction_warning
+            base_reasoning = med.get("reasoning", "Suggested medication from natural-language voice note")
+            med["reasoning"] = f"{base_reasoning} [ALERT: {interaction_warning}]".strip()
+
         draft_id = f"draft_voice_med_{uuid.uuid4().hex[:8]}"
         draft = AIDraft(
             id=draft_id,

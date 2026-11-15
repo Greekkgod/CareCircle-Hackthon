@@ -5,7 +5,7 @@ addresses, and dates of birth) before text is transmitted to external LLM servic
 """
 
 import re
-from typing import Dict, NamedTuple
+from typing import Dict, List, NamedTuple, Optional
 
 
 class RedactionResult(NamedTuple):
@@ -81,6 +81,33 @@ def redact_names(text: str) -> tuple[str, int]:
     return sanitized, len(matches)
 
 
+def redact_known_names(text: str, names: List[str]) -> tuple[str, int]:
+    """Redact explicitly known patient and family member names from text.
+
+    Args:
+        text: Input text string.
+        names: List of known names (e.g. ['Rose Dawson', 'David']).
+
+    Returns:
+        Tuple of (sanitized_text, count_redacted).
+    """
+    sanitized = text
+    total_matches = 0
+    # Match longest names first so 'Rose Dawson' matches before 'Rose'
+    sorted_names = sorted(
+        [n.strip() for n in names if n and len(n.strip()) >= 2],
+        key=len,
+        reverse=True,
+    )
+    for name in sorted_names:
+        pattern = re.compile(rf"\b{re.escape(name)}\b", re.IGNORECASE)
+        matches = pattern.findall(sanitized)
+        if matches:
+            total_matches += len(matches)
+            sanitized = pattern.sub("[REDACTED_NAME]", sanitized)
+    return sanitized, total_matches
+
+
 def redact_addresses(text: str) -> tuple[str, int]:
     """Redact street addresses from text."""
     matches = ADDRESS_REGEX.findall(text)
@@ -88,11 +115,12 @@ def redact_addresses(text: str) -> tuple[str, int]:
     return sanitized, len(matches)
 
 
-def redact_pii(text: str) -> RedactionResult:
+def redact_pii(text: str, known_names: Optional[List[str]] = None) -> RedactionResult:
     """Execute all PII redaction passes on input text before LLM dispatch.
 
     Args:
         text: Raw text containing potential personal identifiers.
+        known_names: Optional list of known patient and family names to scrub.
 
     Returns:
         RedactionResult containing sanitized text and count metrics.
@@ -119,6 +147,12 @@ def redact_pii(text: str) -> RedactionResult:
     current, count = redact_names(current)
     if count:
         categories["names"] = count
+
+    # Contextual roster scrubbing for known elder and circle members
+    if known_names:
+        current, count = redact_known_names(current, known_names)
+        if count:
+            categories["known_names"] = count
 
     current, count = redact_addresses(current)
     if count:
