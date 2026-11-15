@@ -14,7 +14,9 @@ Strict Rules:
 """
 
 from typing import Any, Dict, List, Optional
+
 from fastapi import APIRouter, Depends, HTTPException, status
+
 from app.core.security import require_roles
 from app.models.ai_draft import (
     AIDraft,
@@ -26,7 +28,7 @@ from app.models.ai_draft import (
     VoiceOrNaturalLanguageRequest,
     WhyAmITakingThisRequest,
 )
-from app.services.draft_service import get_draft, list_drafts, process_draft_confirmation
+from app.services.draft_service import list_drafts, process_draft_confirmation
 from app.services.gemini_service import (
     explain_why_am_i_taking_this,
     generate_doctor_briefing,

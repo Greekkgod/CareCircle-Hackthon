@@ -1,9 +1,11 @@
 """Authentication endpoints with passcode verification and rate limiting."""
 
 from typing import Dict
+
 from fastapi import APIRouter, Depends, Request
+
 from app.core.security import get_current_user
-from app.models.auth import PasscodeLogin, RateLimitStatus, TokenResponse, UserProfile
+from app.models.auth import PasscodeLogin, RateLimitStatus, TokenResponse
 from app.services.auth_service import authenticate_with_passcode, get_rate_limit_status
 
 router = APIRouter(prefix="/api/auth", tags=["Authentication"])

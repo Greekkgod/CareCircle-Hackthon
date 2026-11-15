@@ -33,9 +33,9 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
         # Referrer privacy
         response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
 
-        # Restrict browser APIs not needed by platform
+        # Restrict browser APIs not needed by platform (allow self for voice & prescription capture)
         response.headers["Permissions-Policy"] = (
-            "geolocation=(), microphone=(), camera=(), payment=()"
+            "geolocation=(), microphone=(self), camera=(self), payment=()"
         )
 
         # Enforce HTTPS transport policy

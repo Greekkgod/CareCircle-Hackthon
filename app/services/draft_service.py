@@ -6,6 +6,7 @@ only upon explicit human approval.
 
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional, Tuple
+
 from app.core.database import db
 from app.models.ai_draft import AIDraft, DraftStatus, DraftType
 from app.models.appointment import AppointmentCreate

@@ -4,6 +4,7 @@ Loads environment variables and validates configuration settings using Pydantic.
 """
 
 from typing import List
+
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 

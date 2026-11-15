@@ -1,8 +1,10 @@
 """Appointment endpoints with role-based permissions and caretaker ChangeRequest flow."""
 
 from typing import Any, Dict, List, Optional
+
 from fastapi import APIRouter, Depends, HTTPException, Response, status
 from pydantic import BaseModel, Field
+
 from app.core.database import db
 from app.core.security import require_roles
 from app.models.appointment import Appointment, AppointmentCreate, AppointmentStatus

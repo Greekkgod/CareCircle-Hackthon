@@ -14,12 +14,12 @@ Strict Safety Rules:
 """
 
 import base64
-from datetime import datetime, timedelta, timezone
 import json
 import logging
 import re
-from typing import Any, Dict, List, Optional
 import uuid
+from datetime import datetime, timezone
+from typing import Any, Dict, List, Optional
 
 from app.core.config import settings
 from app.core.database import db
@@ -475,7 +475,7 @@ def generate_doctor_briefing(
 
     # 2. Fetch recent dose logs
     dose_logs = db.list("dose_logs", filters=[("elder_id", "==", elder_id)], limit=50)
-    missed_logs = [l for l in dose_logs if l.get("status") in ("MISSED", "SNOOZED")]
+    missed_logs = [log for log in dose_logs if log.get("status") in ("MISSED", "SNOOZED")]
     checkins = db.list("checkins", filters=[("elder_id", "==", elder_id)], limit=10)
 
     # 3. Appointment context if specified
@@ -501,6 +501,7 @@ def generate_doctor_briefing(
 
             client = genai.Client(api_key=settings.gemini_api_key)
             context_summary = (
+                f"Patient: {sanitized_elder_name}. "
                 f"Adherence: {rate} over past {timeframe_days} days. Consecutive Streak: {streak} days. "
                 f"Total doses logged: {total_logged}. Missed or snoozed count: {missed_count}. "
                 f"Recent check-in moods: {[c.get('mood') for c in checkins[:5]]}. "

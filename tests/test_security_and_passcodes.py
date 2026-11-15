@@ -1,6 +1,7 @@
 """Tests for security headers, bcrypt hashing, and passcode rate limiting."""
 
 from starlette.testclient import TestClient
+
 from app.core.config import settings
 from app.core.security import hash_passcode, rate_limiter, verify_passcode
 

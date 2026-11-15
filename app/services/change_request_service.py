@@ -3,15 +3,17 @@
 Caretaker edits generate a ChangeRequest that only the elder can approve or reject.
 """
 
-from datetime import datetime, timedelta, timezone
 import uuid
+from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional, Tuple
+
 from fastapi import HTTPException, status
+
 from app.core.database import db
+from app.models.appointment import Appointment
 from app.models.audit import AuditEntry
 from app.models.change_request import ChangeRequest, ChangeRequestStatus, EntityType
 from app.models.medication import Medication
-from app.models.appointment import Appointment
 
 
 def log_audit(

@@ -6,6 +6,7 @@ mandatory medical disclaimer to confirm all details with a doctor or pharmacist.
 
 from enum import Enum
 from typing import Any, Dict, Optional
+
 from pydantic import BaseModel, Field
 
 

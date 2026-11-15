@@ -4,10 +4,10 @@ Coordinates the pure escalation engine, database persistence, idempotency sent-l
 email interface dispatch with retries, and quiet-hours digest batching.
 """
 
-from datetime import datetime, timedelta, timezone
 import logging
-from typing import Any, Dict, List, Optional
 import uuid
+from datetime import datetime, timedelta, timezone
+from typing import Any, Dict, List, Optional
 
 from app.core.config import settings
 from app.core.database import db
@@ -18,7 +18,6 @@ from app.models.notification import (
     EscalationConfig,
     NotificationLog,
     NotificationStatus,
-    PendingNotification,
     QuietHoursConfig,
     SimulationTimeResponse,
 )

@@ -1,13 +1,26 @@
 """Pydantic Firestore data models for CareCircle platform."""
 
+from app.models.ai_draft import (
+    AIDraft,
+    ConfirmDraftRequest,
+    DoctorBriefingRequest,
+    DraftStatus,
+    DraftType,
+    ParseNoteRequest,
+    PrescriptionPhotoRequest,
+    VoiceOrNaturalLanguageRequest,
+    WhyAmITakingThisRequest,
+)
 from app.models.appointment import Appointment, AppointmentCreate, AppointmentStatus
 from app.models.audit import AuditEntry, AuditEntryCreate
+from app.models.auth import PasscodeLogin, RateLimitStatus, TokenResponse, UserProfile, UserRole
 from app.models.change_request import (
     ChangeRequest,
     ChangeRequestCreate,
     ChangeRequestStatus,
     EntityType,
 )
+from app.models.checkin import CheckIn, CheckInCreate, EmergencyAlert, EmergencySOSCreate, MoodLevel
 from app.models.medication import (
     AdherenceStats,
     DoseLog,
@@ -25,19 +38,6 @@ from app.models.member import (
     MemberCreate,
     MemberRole,
 )
-from app.models.ai_draft import (
-    AIDraft,
-    ConfirmDraftRequest,
-    DoctorBriefingRequest,
-    DraftStatus,
-    DraftType,
-    ParseNoteRequest,
-    PrescriptionPhotoRequest,
-    VoiceOrNaturalLanguageRequest,
-    WhyAmITakingThisRequest,
-)
-from app.models.auth import PasscodeLogin, RateLimitStatus, TokenResponse, UserProfile, UserRole
-from app.models.checkin import CheckIn, CheckInCreate, EmergencyAlert, EmergencySOSCreate, MoodLevel
 from app.models.notification import (
     AlertPriority,
     DigestQueueItem,

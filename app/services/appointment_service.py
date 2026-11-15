@@ -1,8 +1,9 @@
 """Appointment management service."""
 
-from datetime import datetime, timezone
 import uuid
+from datetime import datetime, timezone
 from typing import List, Optional
+
 from app.core.database import db
 from app.models.appointment import Appointment, AppointmentCreate, AppointmentStatus
 

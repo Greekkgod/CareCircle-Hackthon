@@ -1,6 +1,7 @@
 """Tests verifying the strict rule: AI only suggests, humans must confirm."""
 
 from starlette.testclient import TestClient
+
 from app.core.database import db
 from app.models.ai_draft import DraftStatus
 

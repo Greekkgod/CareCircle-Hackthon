@@ -1,8 +1,10 @@
 """ChangeRequest API routes implementing the plain-language elder-consent workflow."""
 
 from typing import Any, Dict, List, Optional
-from fastapi import APIRouter, Depends, HTTPException, status
+
+from fastapi import APIRouter, Depends, status
 from pydantic import BaseModel, Field
+
 from app.core.security import require_roles
 from app.models.change_request import ChangeRequest, ChangeRequestCreate, ChangeRequestStatus
 from app.services import change_request_service

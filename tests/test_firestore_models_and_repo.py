@@ -12,6 +12,7 @@ Covers:
 """
 
 from starlette.testclient import TestClient
+
 from app.core.database import FakeInMemoryRepository
 from app.core.security import hash_passcode, verify_passcode
 from app.models import (

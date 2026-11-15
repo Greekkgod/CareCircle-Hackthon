@@ -8,6 +8,7 @@ Provides:
 
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
+
 from fastapi import APIRouter, Depends, Header, HTTPException, Query, status
 
 from app.core.config import settings
@@ -16,7 +17,6 @@ from app.core.security import require_roles
 from app.models.notification import SimulationTimeRequest, SimulationTimeResponse
 from app.services.escalation_service import (
     flush_digest_queue,
-    get_current_escalation_time,
     run_reminders_all_elders,
     set_simulated_clock,
     simulate_time_advance,

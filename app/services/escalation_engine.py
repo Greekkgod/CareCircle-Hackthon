@@ -346,6 +346,6 @@ def build_digest_summary_email(
         f"Here is your compiled CareCircle digest for {elder_name}.\n"
         f"The following {len(items)} low-priority updates were gathered during quiet hours:\n\n"
         + "\n".join(item_lines)
-        + f"\n\nLog in to your CareCircle dashboard for full adherence logs."
+        + "\n\nLog in to your CareCircle dashboard for full adherence logs."
     )
     return subject, body

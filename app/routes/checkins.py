@@ -1,7 +1,9 @@
 """Daily check-in and emergency SOS endpoints."""
 
 from typing import Dict, List, Optional
+
 from fastapi import APIRouter, Depends, HTTPException, status
+
 from app.core.security import require_roles
 from app.models.checkin import (
     CheckIn,

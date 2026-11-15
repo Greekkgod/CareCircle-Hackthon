@@ -2,6 +2,7 @@
 
 import pytest
 from starlette.testclient import TestClient
+
 from app.core.database import FakeInMemoryRepository, db
 from app.core.security import create_access_token, rate_limiter
 from app.main import app

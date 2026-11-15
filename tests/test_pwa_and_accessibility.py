@@ -1,6 +1,7 @@
 """Tests for PWA capabilities and accessibility requirements."""
 
 from pathlib import Path
+
 from starlette.testclient import TestClient
 
 

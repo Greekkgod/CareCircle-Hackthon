@@ -7,6 +7,7 @@ Matrix rules:
 """
 
 from starlette.testclient import TestClient
+
 from app.core.database import db
 
 
@@ -87,6 +88,7 @@ def test_medication_permission_matrix(
     assert resp_edit_care.status_code == 202
     assert resp_edit_care.json()["status"] == "pending_approval"
     cr_id = resp_edit_care.json()["change_request"]["id"]
+    assert cr_id.startswith("cr_")
     # Verify medication in DB still has 40 mg (NOT 80 mg!)
     assert db.get("medications", created_id)["dosage"] == "40 mg"
 

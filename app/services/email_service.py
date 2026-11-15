@@ -4,12 +4,13 @@ Follows the Dependency Inversion Principle, isolating external delivery mechanis
 behind an abstract interface with support for test assertions and retries.
 """
 
+import logging
+import smtplib
 from abc import ABC, abstractmethod
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
-import logging
-import smtplib
 from typing import Any, Dict, List, Optional
+
 from app.core.config import settings
 
 logger = logging.getLogger(__name__)

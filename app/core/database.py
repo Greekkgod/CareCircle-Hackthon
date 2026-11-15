@@ -3,9 +3,10 @@
 Provides document CRUD, querying, filtering, and test isolation.
 """
 
-from datetime import datetime, timezone
 import threading
+from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional, Protocol, Tuple
+
 from app.core.config import settings
 
 

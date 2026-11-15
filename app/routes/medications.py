@@ -1,8 +1,10 @@
 """Medication endpoints enforcing role permissions and caretaker change requests."""
 
 from typing import Any, Dict, List, Optional
+
 from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
 from pydantic import BaseModel, Field
+
 from app.core.database import db
 from app.core.security import require_roles
 from app.models.change_request import EntityType

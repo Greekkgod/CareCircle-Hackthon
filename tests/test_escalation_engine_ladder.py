@@ -12,6 +12,7 @@ Covers:
 """
 
 from datetime import datetime, timezone
+
 import pytest
 from fastapi.testclient import TestClient
 
@@ -21,7 +22,6 @@ from app.main import app
 from app.models.medication import DoseStatus
 from app.models.member import MemberRole
 from app.models.notification import (
-    AlertPriority,
     DigestQueueItem,
     EscalationConfig,
     EscalationLevel,
@@ -35,10 +35,8 @@ from app.services.escalation_engine import (
 )
 from app.services.escalation_service import (
     dispatch_with_retries,
-    flush_digest_queue,
     run_escalation_for_elder,
     set_simulated_clock,
-    simulate_time_advance,
 )
 
 client = TestClient(app)

@@ -3,9 +3,10 @@
 Configures routes, security middleware, static asset serving, and startup seeding.
 """
 
-from contextlib import asynccontextmanager
 import os
+from contextlib import asynccontextmanager
 from pathlib import Path
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse

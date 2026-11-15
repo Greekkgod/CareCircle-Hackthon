@@ -1,8 +1,9 @@
 """Authentication service with bcrypt passcode verification and rate limiting."""
 
 from datetime import datetime, timezone
-from typing import Optional, Tuple
+
 from fastapi import HTTPException, status
+
 from app.core.database import db
 from app.core.security import (
     create_access_token,
