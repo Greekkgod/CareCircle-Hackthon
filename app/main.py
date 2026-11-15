@@ -13,7 +13,14 @@ from fastapi.staticfiles import StaticFiles
 
 from app.core.config import settings
 from app.core.middleware import SecurityHeadersMiddleware
-from app.routes import ai_assistant, appointments, auth, checkins, medications
+from app.routes import (
+    ai_assistant,
+    appointments,
+    auth,
+    change_requests,
+    checkins,
+    medications,
+)
 from app.services.auth_service import seed_default_users
 
 STATIC_DIR = Path(__file__).resolve().parent.parent / "static"
@@ -51,6 +58,7 @@ app.add_middleware(
 app.include_router(auth.router)
 app.include_router(medications.router)
 app.include_router(appointments.router)
+app.include_router(change_requests.router)
 app.include_router(ai_assistant.router)
 app.include_router(checkins.router)
 

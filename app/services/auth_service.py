@@ -42,6 +42,19 @@ def seed_default_users() -> None:
         },
     ]
 
+    # Seed primary elder profile tied to all 3 demo accounts
+    if not db.get("elder_profiles", "elder_1"):
+        db.set("elder_profiles", "elder_1", {
+            "id": "elder_1",
+            "name": "Rose Dawson",
+            "date_of_birth": "1944-04-12",
+            "emergency_contact": "+1-555-0199",
+            "medical_notes": "Hypertension, Type 2 Diabetes",
+            "timezone": "America/New_York",
+            "created_at": datetime.now(timezone.utc).isoformat(),
+            "updated_at": datetime.now(timezone.utc).isoformat(),
+        })
+
     for user in default_users:
         existing = db.get("users", user["id"])
         if not existing:
@@ -56,6 +69,7 @@ def seed_default_users() -> None:
                 "created_at": datetime.now(timezone.utc).isoformat(),
             }
             db.set("users", user["id"], record)
+            db.set("members", user["id"], record)
 
     # Seed sample medications if none exist
     existing_meds = db.list("medications", filters=[("elder_id", "==", "elder_1")])
