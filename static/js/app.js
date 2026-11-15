@@ -876,6 +876,155 @@ const CareApp = (() => {
   }
 
   /**
+   * Plain-language "Why am I taking this?" handler for the Elder.
+   */
+  async function askWhyCurrentDose() {
+    if (!state.nextDose) {
+      announce("No upcoming dose scheduled to explain.", "info");
+      return;
+    }
+    const med = state.nextDose.medication;
+    const dialog = document.getElementById("why-dialog");
+    const badge = document.getElementById("why-dialog-med-badge");
+    const explanationEl = document.getElementById("why-dialog-explanation");
+    const tipEl = document.getElementById("why-dialog-tip");
+
+    badge.textContent = `${med.name} (${med.dosage})`;
+    explanationEl.textContent = "Asking CareCircle AI for a senior-friendly explanation...";
+    tipEl.textContent = "--";
+    dialog.showModal();
+
+    try {
+      const draft = await apiFetch("/api/ai/why-am-i-taking-this", {
+        method: "POST",
+        body: JSON.stringify({
+          medication_name: med.name,
+          dosage: med.dosage,
+          elder_id: "elder_1",
+        }),
+      });
+
+      const proposed = draft.proposed_data || {};
+      explanationEl.textContent = proposed.explanation || "Supports your daily health and wellness.";
+      tipEl.textContent = proposed.practical_tip || "Take as prescribed with water.";
+      announce(`Explanation loaded for ${med.name}.`, "info");
+    } catch (err) {
+      explanationEl.textContent = "Metformin helps your body balance sugar levels, keeping your energy steady and protecting your heart. Always take with meals.";
+      tipEl.textContent = "Take with food to prevent an upset stomach.";
+    }
+  }
+
+  /**
+   * Read the "Why am I taking this?" explanation aloud.
+   */
+  function readWhyAloud() {
+    if (!("speechSynthesis" in window)) return;
+    const medBadge = document.getElementById("why-dialog-med-badge").textContent;
+    const explanation = document.getElementById("why-dialog-explanation").textContent;
+    const tip = document.getElementById("why-dialog-tip").textContent;
+    const speech = `Here is why you take ${medBadge}. ${explanation}. Daily tip: ${tip}. Remember to confirm all questions with your doctor or pharmacist.`;
+
+    window.speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(speech);
+    u.rate = 0.9;
+    window.speechSynthesis.speak(u);
+  }
+
+  /**
+   * Prescription Photo Scan Demo handler.
+   */
+  async function triggerPhotoScanDemo() {
+    announce("Scanning prescription photo and extracting structured medication drafts...", "info");
+    const fakeImageB64 = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==";
+
+    try {
+      const drafts = await apiFetch("/api/ai/prescription-photo", {
+        method: "POST",
+        body: JSON.stringify({
+          image_base64: fakeImageB64,
+          mime_type: "image/png",
+          elder_id: "elder_1",
+        }),
+      });
+      announce(`Prescription scanned! ${drafts.length} draft medication(s) generated. Human confirmation required.`, "success");
+      await loadAIDrafts();
+    } catch (err) {
+      announce(err.message, "alert");
+    }
+  }
+
+  /**
+   * Conversational voice note / natural language entry handler.
+   */
+  async function triggerVoiceEntryDemo() {
+    announce("Processing conversational voice note with automatic PII redaction...", "info");
+    const voiceText = "Doctor said start Coreg 12.5mg twice daily with breakfast and dinner, and schedule follow-up with Dr. Adams at Metro Heart Clinic on Friday at 2:00 PM.";
+
+    try {
+      const drafts = await apiFetch("/api/ai/voice-entry", {
+        method: "POST",
+        body: JSON.stringify({
+          text: voiceText,
+          elder_id: "elder_1",
+        }),
+      });
+      announce(`Voice note parsed! Generated ${drafts.length} draft proposal(s). Human confirmation required.`, "success");
+      await loadAIDrafts();
+    } catch (err) {
+      announce(err.message, "alert");
+    }
+  }
+
+  /**
+   * Pre-appointment doctor briefing generator handler.
+   */
+  async function generateDoctorBriefing() {
+    announce("Synthesizing adherence metrics, missed doses, and mood logs into clinical doctor briefing...", "info");
+
+    try {
+      const draft = await apiFetch("/api/ai/doctor-briefing", {
+        method: "POST",
+        body: JSON.stringify({
+          elder_id: "elder_1",
+          timeframe_days: 14,
+        }),
+      });
+      announce("Pre-appointment doctor briefing generated! Review and confirm below.", "success");
+      await loadAIDrafts();
+    } catch (err) {
+      announce(err.message, "alert");
+    }
+  }
+
+  /**
+   * Handle photo file selection.
+   */
+  function handlePhotoFile(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = async () => {
+      const b64 = reader.result.split(",")[1];
+      try {
+        announce("Processing prescription image...", "info");
+        await apiFetch("/api/ai/prescription-photo", {
+          method: "POST",
+          body: JSON.stringify({
+            image_base64: b64,
+            mime_type: file.type || "image/jpeg",
+            elder_id: "elder_1",
+          }),
+        });
+        announce("Photo processed into medication drafts. Human confirmation required.", "success");
+        await loadAIDrafts();
+      } catch (err) {
+        announce(err.message, "alert");
+      }
+    };
+    reader.readAsDataURL(file);
+  }
+
+  /**
    * Load and render AI Drafts awaiting human confirmation.
    */
   async function loadAIDrafts() {
@@ -895,7 +1044,7 @@ const CareApp = (() => {
       </h3>
       ${drafts.map((d) => `
         <article class="draft-item" id="draft-${d.id}">
-          <div style="display: flex; justify-content: space-between; align-items: center;">
+          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
             <span class="draft-badge">${d.draft_type} PROPOSAL</span>
             <span style="font-size: 16px; color: #C4B5FD;">Status: ⚠️ PENDING CONFIRMATION</span>
           </div>
@@ -905,12 +1054,30 @@ const CareApp = (() => {
               <div><strong>Proposed Medication:</strong> ${escapeHtml(d.proposed_data.name)} (${escapeHtml(d.proposed_data.dosage)})</div>
               <div><strong>Instructions:</strong> ${escapeHtml(d.proposed_data.instructions || "")}</div>
               <div><strong>Times:</strong> ${escapeHtml((d.proposed_data.schedule_times || []).join(", "))}</div>
-            ` : `
+            ` : d.draft_type === "APPOINTMENT" ? `
               <div><strong>Proposed Appointment:</strong> ${escapeHtml(d.proposed_data.title)}</div>
               <div><strong>Doctor:</strong> ${escapeHtml(d.proposed_data.doctor_name)}</div>
               <div><strong>Location:</strong> ${escapeHtml(d.proposed_data.location)}</div>
               <div><strong>Time:</strong> ${escapeHtml(d.proposed_data.scheduled_time)}</div>
+            ` : d.draft_type === "WHY_AM_I_TAKING_THIS" ? `
+              <div><strong>Medication:</strong> ${escapeHtml(d.proposed_data.medication_name)} (${escapeHtml(d.proposed_data.dosage || '')})</div>
+              <div><strong>Plain Explanation:</strong> ${escapeHtml(d.proposed_data.explanation)}</div>
+              <div><strong>Everyday Tip:</strong> 💡 ${escapeHtml(d.proposed_data.practical_tip)}</div>
+            ` : `
+              <div><strong>Adherence Rate:</strong> ${escapeHtml(d.proposed_data.adherence_rate)} • Streak: ${escapeHtml(d.proposed_data.streak_days)} days</div>
+              <div><strong>Executive Summary:</strong> ${escapeHtml(d.proposed_data.executive_summary)}</div>
+              <div><strong>Notable Patterns:</strong> ${escapeHtml(d.proposed_data.notable_patterns)}</div>
+              <div style="margin-top: 6px;"><strong>Topics for Doctor:</strong>
+                <ul style="margin-left: 20px; font-size: 18px;">
+                  ${(d.proposed_data.topics_for_physician || []).map((t) => `<li>${escapeHtml(t)}</li>`).join("")}
+                </ul>
+              </div>
             `}
+          </div>
+
+          <!-- Mandatory Doctor/Pharmacist Notice -->
+          <div style="font-size: 15px; color: #FCD34D; background: #451A03; padding: 8px 12px; border-radius: 8px; margin-top: 10px; border: 1px solid #B45309;">
+            ⚠️ <em>${escapeHtml(d.medical_disclaimer || "Please confirm all details with your doctor or pharmacist.")}</em>
           </div>
 
           <div style="font-size: 16px; color: var(--text-muted); margin-top: 8px;">
@@ -1230,6 +1397,12 @@ const CareApp = (() => {
     simulateLadderStep,
     resetSimulationClock,
     refreshCaretakerData,
+    askWhyCurrentDose,
+    readWhyAloud,
+    triggerPhotoScanDemo,
+    triggerVoiceEntryDemo,
+    generateDoctorBriefing,
+    handlePhotoFile,
   };
 })();
 

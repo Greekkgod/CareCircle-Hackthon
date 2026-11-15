@@ -25,7 +25,17 @@ from app.models.member import (
     MemberCreate,
     MemberRole,
 )
-from app.models.ai_draft import AIDraft, ConfirmDraftRequest, DraftStatus, DraftType, ParseNoteRequest
+from app.models.ai_draft import (
+    AIDraft,
+    ConfirmDraftRequest,
+    DoctorBriefingRequest,
+    DraftStatus,
+    DraftType,
+    ParseNoteRequest,
+    PrescriptionPhotoRequest,
+    VoiceOrNaturalLanguageRequest,
+    WhyAmITakingThisRequest,
+)
 from app.models.auth import PasscodeLogin, RateLimitStatus, TokenResponse, UserProfile, UserRole
 from app.models.checkin import CheckIn, CheckInCreate, EmergencyAlert, EmergencySOSCreate, MoodLevel
 from app.models.notification import (
@@ -71,6 +81,10 @@ __all__ = [
     "DraftStatus",
     "DraftType",
     "ParseNoteRequest",
+    "PrescriptionPhotoRequest",
+    "VoiceOrNaturalLanguageRequest",
+    "WhyAmITakingThisRequest",
+    "DoctorBriefingRequest",
     "PasscodeLogin",
     "RateLimitStatus",
     "TokenResponse",

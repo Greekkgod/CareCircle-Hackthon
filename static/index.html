@@ -121,6 +121,10 @@
                 🔊 Read Aloud
               </button>
             </div>
+
+            <button id="btn-why-hero" class="btn-secondary" style="font-size: 20px; min-height: 52px; width: 100%; border-color: #60A5FA; color: #93C5FD; display: flex; align-items: center; justify-content: center; gap: 8px;" onclick="CareApp.askWhyCurrentDose()" aria-label="Explain why I am taking this medicine in plain language">
+              🤔 Why Am I Taking This?
+            </button>
           </div>
         </article>
 
@@ -298,8 +302,18 @@
               ✨ Scan &amp; Generate Drafts
             </button>
             <button type="button" class="btn-secondary" onclick="CareApp.loadSampleText()">
-              Reset Sample Text
+              Reset Text
             </button>
+            <button type="button" class="btn-primary" style="background: #059669; border-color: #6EE7B7;" onclick="CareApp.triggerPhotoScanDemo()">
+              📷 Scan Prescription Photo
+            </button>
+            <button type="button" class="btn-primary" style="background: #7C3AED; border-color: #C4B5FD;" onclick="CareApp.triggerVoiceEntryDemo()">
+              🎙️ Voice Note Entry
+            </button>
+            <button type="button" class="btn-secondary" style="border-color: #38BDF8; color: #7DD3FC;" onclick="CareApp.generateDoctorBriefing()">
+              📋 Doctor Briefing
+            </button>
+            <input type="file" id="photo-upload-input" accept="image/*" style="display: none;" onchange="CareApp.handlePhotoFile(event)">
           </div>
         </form>
 
@@ -443,6 +457,34 @@
       </article>
     </section>
   </main>
+
+  <!-- Plain-Language Senior "Why Am I Taking This?" Dialog -->
+  <dialog id="why-dialog" style="padding: 28px; border-radius: var(--border-radius); background: #1E293B; color: #FFFFFF; border: 3px solid #38BDF8; max-width: 550px; margin: auto;">
+    <h2 style="font-size: 28px; margin-bottom: 8px; color: #7DD3FC;" id="why-dialog-title">🤔 Why Am I Taking This?</h2>
+    
+    <div id="why-dialog-med-badge" style="font-size: 20px; font-weight: bold; color: #A5F3FC; margin-bottom: 14px;">
+      Metformin (500mg)
+    </div>
+
+    <div style="background: #0F172A; border: 2px solid #334155; border-radius: 14px; padding: 18px; margin-bottom: 16px;">
+      <p id="why-dialog-explanation" style="font-size: 22px; line-height: 1.5; color: #F8FAFC;">
+        Loading plain-language explanation...
+      </p>
+      <div id="why-dialog-tip-box" style="margin-top: 14px; padding-top: 12px; border-top: 1px dashed #475569; font-size: 19px; color: #FDE047;">
+        💡 <strong>Daily Tip:</strong> <span id="why-dialog-tip">--</span>
+      </div>
+    </div>
+
+    <!-- Mandatory Doctor/Pharmacist Confirmation Notice -->
+    <div style="font-size: 16px; color: #FCD34D; background: #78350F; padding: 10px 14px; border-radius: 10px; margin-bottom: 20px; border: 1px solid #F59E0B;">
+      ⚠️ <em>Please always confirm all details with your doctor or pharmacist.</em>
+    </div>
+
+    <div style="display: flex; gap: 12px; justify-content: flex-end; flex-wrap: wrap;">
+      <button type="button" class="btn-secondary" onclick="CareApp.readWhyAloud()">🔊 Read Aloud</button>
+      <button type="button" class="btn-primary" onclick="document.getElementById('why-dialog').close()">Got It!</button>
+    </div>
+  </dialog>
 
   <!-- Passcode Switch / Sign-in Modal Dialog -->
   <dialog id="auth-dialog" style="padding: 24px; border-radius: var(--border-radius); background: #1E293B; color: #FFFFFF; border: 3px solid #3B82F6; max-width: 440px; margin: auto;">

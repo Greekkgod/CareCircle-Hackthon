@@ -99,6 +99,10 @@ def process_draft_confirmation(
         )
         created_entity = create_appointment(draft.elder_id, appt_create)
 
+    elif draft.draft_type in (DraftType.WHY_AM_I_TAKING_THIS, DraftType.DOCTOR_BRIEFING):
+        # Confirmed clinical explanation or doctor briefing note
+        created_entity = final_data
+
     updated = db.update("ai_drafts", draft_id, {
         "status": DraftStatus.CONFIRMED.value,
         "proposed_data": final_data,
