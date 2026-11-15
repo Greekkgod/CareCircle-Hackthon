@@ -6,7 +6,7 @@
 const CareApp = (() => {
   // Application State
   const state = {
-    role: "elder",
+    role: "caretaker",
     elderTab: "today",
     textSize: localStorage.getItem("carecircle_text_size") || "normal",
     highContrast: localStorage.getItem("carecircle_theme") === "high-contrast",
@@ -191,10 +191,16 @@ const CareApp = (() => {
 
     if (role === "elder") {
       document.body.classList.add("elder-active");
+      document.body.classList.remove("caretaker-active");
       if (nav) nav.style.display = "flex";
       switchElderTab(state.elderTab || "today");
+    } else if (role === "caretaker") {
+      document.body.classList.remove("elder-active");
+      document.body.classList.add("caretaker-active");
+      if (nav) nav.style.display = "none";
     } else {
       document.body.classList.remove("elder-active");
+      document.body.classList.remove("caretaker-active");
       if (nav) nav.style.display = "none";
     }
 
@@ -207,7 +213,7 @@ const CareApp = (() => {
         btn.classList.toggle("active", isActive);
       }
       if (sec) {
-        sec.style.display = isActive ? "flex" : "none";
+        sec.style.display = isActive ? "block" : "none";
       }
     });
   }
@@ -1358,6 +1364,215 @@ const CareApp = (() => {
   /**
    * Quire SaaS Dashboard Interaction Methods
    */
+  let currentQuireMode = "quire";
+
+  function switchQuireDataMode(mode) {
+    currentQuireMode = mode;
+    const btnQuire = document.getElementById("btn-mode-quire");
+    const btnCare = document.getElementById("btn-mode-carecircle");
+    if (btnQuire && btnCare) {
+      if (mode === "quire") {
+        btnQuire.className = "quire-action-pill-btn primary";
+        btnCare.className = "quire-action-pill-btn";
+        btnCare.style.border = "none";
+        btnCare.style.background = "transparent";
+      } else {
+        btnCare.className = "quire-action-pill-btn primary";
+        btnQuire.className = "quire-action-pill-btn";
+        btnQuire.style.border = "none";
+        btnQuire.style.background = "transparent";
+      }
+    }
+
+    if (mode === "quire") {
+      const orgWrap = document.querySelector(".patient-profile-card");
+      if (orgWrap) {
+        orgWrap.innerHTML = `
+          <div style="width: 38px; height: 38px; border-radius: 8px; background: #059669; color: #FFFFFF; font-size: 20px; display: flex; align-items: center; justify-content: center; font-weight: 800;">O</div>
+          <div style="flex: 1; min-width: 0;">
+            <div style="font-size: 15px; font-weight: 700; color: #0F172A; display: flex; align-items: center; justify-content: space-between;">
+              <span>Orchard Lane Coffee</span>
+              <span style="font-size: 12px; color: #94A3B8;">⇅</span>
+            </div>
+            <div style="font-size: 12px; color: #64748B;">4 cafés · Books</div>
+          </div>
+        `;
+      }
+
+      const title = document.querySelector(".quire-greeting-title");
+      if (title) title.textContent = "Good morning, Marco";
+      const sub = document.querySelector(".quire-greeting-sub");
+      if (sub) sub.innerHTML = `📅 Sep 1 – Sep 30, 2026 <span style="font-size:12px; color:#94A3B8;">▾ · Updated just now</span>`;
+      
+      const switcher = document.querySelector(".quire-period-switcher");
+      if (switcher) {
+        switcher.innerHTML = `
+          <button type="button" class="quire-period-btn active" onclick="CareApp.setPeriod('september')">September</button>
+          <button type="button" class="quire-period-btn" onclick="CareApp.setPeriod('q3')">Q3</button>
+          <button type="button" class="quire-period-btn" onclick="CareApp.setPeriod('2026')">2026</button>
+        `;
+      }
+
+      const kpis = document.querySelectorAll(".quire-kpi-card");
+      if (kpis.length >= 4) {
+        const l0 = kpis[0].querySelector(".quire-kpi-label span");
+        if (l0) l0.textContent = "Bank balance";
+        kpis[0].querySelector(".quire-kpi-value").textContent = "$648,215.40";
+        kpis[0].querySelector(".quire-kpi-badge").textContent = "+3.8% vs Aug";
+
+        const l1 = kpis[1].querySelector(".quire-kpi-label span");
+        if (l1) l1.textContent = "Gross profit";
+        kpis[1].querySelector(".quire-kpi-value").textContent = "$96,410.25";
+        kpis[1].querySelector(".quire-kpi-badge").textContent = "+6.1% vs Aug";
+
+        const l2 = kpis[2].querySelector(".quire-kpi-label span");
+        if (l2) l2.textContent = "Café & wholesale sales";
+        kpis[2].querySelector(".quire-kpi-value").textContent = "$214,870.00";
+        kpis[2].querySelector(".quire-kpi-badge").textContent = "+4.7% vs Aug";
+
+        const l3 = kpis[3].querySelector(".quire-kpi-label span");
+        if (l3) l3.textContent = "Operating costs";
+        kpis[3].querySelector(".quire-kpi-value").textContent = "$118,460.75";
+        kpis[3].querySelector(".quire-kpi-badge").textContent = "-2.2% vs Aug";
+      }
+
+      const chartTitle = document.querySelector(".chart-card-title span");
+      if (chartTitle) chartTitle.textContent = "Sales vs costs";
+      const breakdownTitle = document.querySelector(".breakdown-card-quire .chart-card-title");
+      if (breakdownTitle) breakdownTitle.textContent = "Costs by type";
+
+      const recHeader = document.querySelector(".reconcile-card-header h3");
+      if (recHeader) recHeader.innerHTML = `Receipts to match <span style="background:#FFEDD5; color:#EA580C; font-size:12px; padding:2px 8px; border-radius:9999px;">9</span>`;
+      const recSub = document.querySelector(".reconcile-card-header div div");
+      if (recSub) recSub.textContent = "Quire found a likely match for every receipt";
+
+      const tbody = document.getElementById("quire-reconcile-tbody");
+      if (tbody) {
+        tbody.innerHTML = `
+          <tr class="reconcile-row">
+            <td>
+              <div style="font-weight: 700; color: #0F172A; display: flex; align-items: center; gap: 8px;">
+                <span>📄</span>
+                <div>
+                  <div>Bean Brothers Imports</div>
+                  <div style="font-size: 12px; color: #94A3B8;">Sep 26 · Invoice #2291</div>
+                </div>
+              </div>
+            </td>
+            <td><span style="color:#EA580C;">✦</span> Green coffee beans</td>
+            <td><span class="certainty-pill clean">96%</span></td>
+            <td style="font-family:'Fira Code', monospace; font-weight:700;">$8,640.00</td>
+            <td><span style="color:#94A3B8; cursor:pointer;">&gt;</span></td>
+          </tr>
+          <tr class="reconcile-row">
+            <td>
+              <div style="font-weight: 700; color: #0F172A; display: flex; align-items: center; gap: 8px;">
+                <span>💳</span>
+                <div>
+                  <div>Uber Eats payout</div>
+                  <div style="font-size: 12px; color: #94A3B8;">Sep 24 · Weekly settlement</div>
+                </div>
+              </div>
+            </td>
+            <td><span style="color:#EA580C;">✦</span> Delivery sales</td>
+            <td><span class="certainty-pill clean">88%</span></td>
+            <td style="font-family:'Fira Code', monospace; font-weight:700; color:#166534;">+$3,215.60</td>
+            <td><span style="color:#94A3B8; cursor:pointer;">&gt;</span></td>
+          </tr>
+          <tr class="reconcile-row">
+            <td>
+              <div style="font-weight: 700; color: #0F172A; display: flex; align-items: center; gap: 8px;">
+                <span>🔧</span>
+                <div>
+                  <div>Hendrix Plumbing</div>
+                  <div style="font-size: 12px; color: #94A3B8;">Sep 21 · Card ••7710</div>
+                </div>
+              </div>
+            </td>
+            <td><span style="color:#EA580C;">✦</span> Equipment repair</td>
+            <td><span class="certainty-pill caution">54%</span></td>
+            <td style="font-family:'Fira Code', monospace; font-weight:700;">$780.00</td>
+            <td><span style="color:#94A3B8; cursor:pointer;">&gt;</span></td>
+          </tr>
+          <tr class="reconcile-row">
+            <td>
+              <div style="font-weight: 700; color: #0F172A; display: flex; align-items: center; gap: 8px;">
+                <span>📦</span>
+                <div>
+                  <div>PrintPak Ltd</div>
+                  <div style="font-size: 12px; color: #94A3B8;">Sep 18 · Bank transfer</div>
+                </div>
+              </div>
+            </td>
+            <td><span style="color:#EA580C;">✦</span> Packaging</td>
+            <td><span class="certainty-pill caution">71%</span></td>
+            <td style="font-family:'Fira Code', monospace; font-weight:700;">$2,310.00</td>
+            <td><span style="color:#94A3B8; cursor:pointer;">&gt;</span></td>
+          </tr>
+        `;
+      }
+
+      const copilotTitle = document.querySelector(".copilot-title-wrap span:nth-child(2)");
+      if (copilotTitle) copilotTitle.textContent = "Ask Quire";
+      const userBubble = document.querySelector(".copilot-bubble.user");
+      if (userBubble) userBubble.textContent = "Which café is pulling our margin down?";
+      const stepPill = document.querySelector(".reasoning-step-pill span:nth-child(2)");
+      if (stepPill) stepPill.textContent = "Checked 312 receipts (3 steps ▾)";
+      const botText = document.querySelector(".copilot-bubble.bot p");
+      if (botText) botText.textContent = "Harbor St ran at an 18% margin, about 11 points below your other cafés. Pricier oat milk and two extra weekend shifts explain most of the gap.";
+
+      const metricsMini = document.querySelector(".copilot-metrics-mini");
+      if (metricsMini) {
+        metricsMini.innerHTML = `
+          <div class="copilot-metric-box">
+            <div class="copilot-metric-box-val">34% <span style="font-size:11px; color:#166534;">+2 pts</span></div>
+            <div class="copilot-metric-box-lbl">Mill Road</div>
+          </div>
+          <div class="copilot-metric-box">
+            <div class="copilot-metric-box-val">31% <span style="font-size:11px; color:#166534;">+1 pt</span></div>
+            <div class="copilot-metric-box-lbl">Old Town</div>
+          </div>
+          <div class="copilot-metric-box">
+            <div class="copilot-metric-box-val">29% <span style="font-size:11px; color:#DC2626;">-1 pt</span></div>
+            <div class="copilot-metric-box-lbl">Riverside</div>
+          </div>
+          <div class="copilot-metric-box" style="background:#FFEDD5; border-color:#FDBA74;">
+            <div class="copilot-metric-box-val" style="color:#EA580C;">18% <span style="font-size:11px; color:#DC2626;">-9 pts</span></div>
+            <div class="copilot-metric-box-lbl" style="color:#C2410C;">Harbor St</div>
+          </div>
+        `;
+      }
+
+      const actions = document.querySelector(".copilot-actions");
+      if (actions) {
+        actions.innerHTML = `
+          <button type="button" class="copilot-action-btn" style="background:#000000; color:#FFFFFF;">👥 Rework Harbor St rota</button>
+          <button type="button" class="copilot-action-btn" style="background:#F1F5F9; color:#0F172A;">Share</button>
+        `;
+      }
+      announce("Loaded Quire Live Dashboard data.");
+    } else {
+      const orgWrap = document.querySelector(".patient-profile-card");
+      if (orgWrap) {
+        orgWrap.innerHTML = `
+          <div class="patient-avatar-wrap" aria-hidden="true">👵</div>
+          <div>
+            <div class="patient-meta-name">Rose Dawson</div>
+            <div class="patient-meta-sub">Age 82 · Cardiopulmonary</div>
+            <div style="margin-top: 4px;">
+              <span class="certainty-pill clean" style="font-size: 11px; padding: 2px 6px;">🟢 On Track</span>
+            </div>
+          </div>
+        `;
+      }
+      const title = document.querySelector(".quire-greeting-title");
+      if (title) title.textContent = "Good morning, Sarah";
+      const sub = document.querySelector(".quire-greeting-sub");
+      if (sub) sub.innerHTML = `📅 Nov 1 – Nov 15, 2026 · Real-time Firestore Sync`;
+      announce("Loaded CareCircle Healthcare data.");
+    }
+  }
+
   function setPeriod(period) {
     const buttons = document.querySelectorAll(".quire-period-btn");
     buttons.forEach((btn) => {
@@ -1519,8 +1734,9 @@ const CareApp = (() => {
     }
 
     try {
-      await login(DEMO_CREDENTIALS.elder.id, DEMO_CREDENTIALS.elder.code);
-      setRoleView("elder");
+      await login(DEMO_CREDENTIALS.caretaker.id, DEMO_CREDENTIALS.caretaker.code);
+      setRoleView("caretaker");
+      await loadCaretakerData();
       await loadElderMeds();
       await loadElderAppts();
       renderElderFamilyNotes();
@@ -1560,6 +1776,7 @@ const CareApp = (() => {
     triggerVoiceEntryDemo,
     generateDoctorBriefing,
     handlePhotoFile,
+    switchQuireDataMode,
     setPeriod,
     batchReconcileMeds,
     quickDoseLog,

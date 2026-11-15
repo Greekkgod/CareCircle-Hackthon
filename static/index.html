@@ -9,9 +9,9 @@
   
   <link rel="manifest" href="/manifest.webmanifest">
   <link rel="icon" href="/static/icons/icon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="/static/css/app.css?v=20261115-3">
+  <link rel="stylesheet" href="/static/css/app.css?v=20261115-4">
 </head>
-<body>
+<body class="caretaker-active">
   <!-- Keyboard Accessible Skip Link -->
   <a href="#main-content" class="skip-link">Skip to main content</a>
 
@@ -45,10 +45,10 @@
 
       <nav aria-label="Role and Profile Switcher" class="role-switcher">
         <label id="role-selector-label" for="elder-tab">View:</label>
-        <button id="elder-tab" class="role-btn active" aria-pressed="true" onclick="CareApp.switchRole('elder')">
+        <button id="elder-tab" class="role-btn" aria-pressed="false" onclick="CareApp.switchRole('elder')">
           👵 Elder
         </button>
-        <button id="caretaker-tab" class="role-btn" aria-pressed="false" onclick="CareApp.switchRole('caretaker')">
+        <button id="caretaker-tab" class="role-btn active" aria-pressed="true" onclick="CareApp.switchRole('caretaker')">
           🩺 Caretaker
         </button>
         <button id="family-tab" class="role-btn" aria-pressed="false" onclick="CareApp.switchRole('family')">
@@ -66,7 +66,7 @@
     <!-- ========================================== -->
     <!-- 1. ELDER VIEW (Ultra-simplified, Large, High Contrast) -->
     <!-- ========================================== -->
-    <section id="elder-view" class="elder-view" aria-labelledby="elder-view-heading">
+    <section id="elder-view" class="elder-view" style="display: none;" aria-labelledby="elder-view-heading">
       <h1 id="elder-view-heading" class="sr-live-region">Elder Dashboard</h1>
 
       <!-- Emergency SOS Card -->
@@ -223,7 +223,7 @@
     <!-- ========================================== -->
     <!-- 2. CARETAKER VIEW (Management, AI Scanner, Confirmation) -->
     <!-- ========================================== -->
-    <section id="caretaker-view" class="caretaker-view" style="display: none;" aria-labelledby="caretaker-heading">
+    <section id="caretaker-view" class="caretaker-view" style="display: block;" aria-labelledby="caretaker-heading">
       <h1 id="caretaker-heading" class="sr-live-region">Caretaker Clinical Console</h1>
 
       <div class="quire-layout">
@@ -318,11 +318,19 @@
               <input type="text" class="quire-search-input" placeholder="Search medications, doctor notes, appointments... (Press / to search)" aria-label="Search clinical records">
             </div>
             <div class="quire-top-actions">
+              <div style="display: flex; gap: 4px; background: #F1F3F5; border-radius: 9999px; padding: 3px; border: 1px solid #E5E7EB;">
+                <button type="button" id="btn-mode-carecircle" class="quire-action-pill-btn primary" style="min-height: 32px; padding: 4px 12px; font-size: 13px;" onclick="CareApp.switchQuireDataMode('carecircle')">
+                  🩺 CareCircle
+                </button>
+                <button type="button" id="btn-mode-quire" class="quire-action-pill-btn" style="min-height: 32px; padding: 4px 12px; font-size: 13px; border: none; background: transparent;" onclick="CareApp.switchQuireDataMode('quire')">
+                  ☕ Quire Live
+                </button>
+              </div>
               <button type="button" class="quire-action-pill-btn" onclick="CareApp.generateDoctorBriefing()">
-                📋 Export Briefing
+                📋 Share Report
               </button>
               <button type="button" class="quire-action-pill-btn primary" onclick="CareApp.refreshCaretakerData()">
-                🔄 Refresh Live
+                🔒 Lock Period
               </button>
             </div>
           </div>
@@ -1018,6 +1026,6 @@
     <p style="margin-top: 4px; font-size: 16px;">Designed for Seniors, Caretakers, and Families. Accessible &amp; Secure.</p>
   </footer>
 
-  <script src="/static/js/app.js?v=20261115-3"></script>
+  <script src="/static/js/app.js?v=20261115-4"></script>
 </body>
 </html>
