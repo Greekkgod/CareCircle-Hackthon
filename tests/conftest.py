@@ -2,10 +2,18 @@
 
 import pytest
 from starlette.testclient import TestClient
-from app.core.database import db
+from app.core.database import FakeInMemoryRepository, db
 from app.core.security import create_access_token, rate_limiter
 from app.main import app
 from app.services.auth_service import seed_default_users
+
+
+@pytest.fixture
+def fake_repo():
+    """Isolated fake in-memory repository instance for model and unit tests."""
+    repo = FakeInMemoryRepository()
+    yield repo
+    repo.clear()
 
 
 @pytest.fixture(autouse=True)

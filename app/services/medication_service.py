@@ -84,6 +84,8 @@ def log_dose(
     data.update({
         "id": log_id,
         "elder_id": elder_id,
+        "logged_at": now_iso,
+        "logged_by": confirmed_by,
         "taken_at": now_iso,
         "confirmed_by": confirmed_by,
     })
