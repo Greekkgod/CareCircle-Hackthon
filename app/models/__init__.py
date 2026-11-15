@@ -28,6 +28,18 @@ from app.models.member import (
 from app.models.ai_draft import AIDraft, ConfirmDraftRequest, DraftStatus, DraftType, ParseNoteRequest
 from app.models.auth import PasscodeLogin, RateLimitStatus, TokenResponse, UserProfile, UserRole
 from app.models.checkin import CheckIn, CheckInCreate, EmergencyAlert, EmergencySOSCreate, MoodLevel
+from app.models.notification import (
+    AlertPriority,
+    DigestQueueItem,
+    EscalationConfig,
+    EscalationLevel,
+    NotificationLog,
+    NotificationStatus,
+    PendingNotification,
+    QuietHoursConfig,
+    SimulationTimeRequest,
+    SimulationTimeResponse,
+)
 
 __all__ = [
     # Core Firestore Entities required by platform specification
@@ -69,4 +81,15 @@ __all__ = [
     "EmergencyAlert",
     "EmergencySOSCreate",
     "MoodLevel",
+    # Notification & Escalation Entities
+    "AlertPriority",
+    "EscalationLevel",
+    "NotificationStatus",
+    "NotificationLog",
+    "QuietHoursConfig",
+    "EscalationConfig",
+    "PendingNotification",
+    "DigestQueueItem",
+    "SimulationTimeRequest",
+    "SimulationTimeResponse",
 ]

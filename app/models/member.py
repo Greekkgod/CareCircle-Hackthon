@@ -22,6 +22,9 @@ class ElderProfileCreate(BaseModel):
     emergency_contact: str = Field(..., min_length=3, max_length=150)
     medical_notes: Optional[str] = Field(default=None, max_length=1000)
     timezone: str = Field(default="UTC", max_length=50)
+    email: Optional[str] = Field(default=None, max_length=120)
+    quiet_hours_start: int = Field(default=22, ge=0, le=23, description="Quiet hours start hour (0-23)")
+    quiet_hours_end: int = Field(default=7, ge=0, le=23, description="Quiet hours end hour (0-23)")
 
 
 class ElderProfile(ElderProfileCreate):
@@ -40,6 +43,7 @@ class MemberCreate(BaseModel):
     role: MemberRole
     passcode: str = Field(..., min_length=4, max_length=64, description="Plaintext passcode to be hashed")
     phone: Optional[str] = Field(default=None, max_length=30)
+    email: Optional[str] = Field(default=None, max_length=120)
 
 
 class Member(BaseModel):
@@ -51,4 +55,5 @@ class Member(BaseModel):
     role: MemberRole
     passcode_hash: str
     phone: Optional[str] = None
+    email: Optional[str] = None
     created_at: str = Field(default_factory=lambda: datetime.now(timezone.utc).isoformat())

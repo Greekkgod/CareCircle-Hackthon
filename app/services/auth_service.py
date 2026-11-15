@@ -22,6 +22,7 @@ def seed_default_users() -> None:
             "role": UserRole.ELDER.value,
             "elder_id": "elder_1",
             "phone": "+1-555-0199",
+            "email": "rose@carecircle.demo",
             "passcode_plain": "1234",
         },
         {
@@ -30,6 +31,7 @@ def seed_default_users() -> None:
             "role": UserRole.CARETAKER.value,
             "elder_id": "elder_1",
             "phone": "+1-555-0144",
+            "email": "sarah.rn@carecircle.demo",
             "passcode_plain": "care2026",
         },
         {
@@ -38,6 +40,7 @@ def seed_default_users() -> None:
             "role": UserRole.FAMILY.value,
             "elder_id": "elder_1",
             "phone": "+1-555-0188",
+            "email": "david.family@carecircle.demo",
             "passcode_plain": "fam1234",
         },
     ]
@@ -51,6 +54,9 @@ def seed_default_users() -> None:
             "emergency_contact": "+1-555-0199",
             "medical_notes": "Hypertension, Type 2 Diabetes",
             "timezone": "America/New_York",
+            "email": "rose@carecircle.demo",
+            "quiet_hours_start": 22,
+            "quiet_hours_end": 7,
             "created_at": datetime.now(timezone.utc).isoformat(),
             "updated_at": datetime.now(timezone.utc).isoformat(),
         })
@@ -65,6 +71,7 @@ def seed_default_users() -> None:
                 "role": user["role"],
                 "elder_id": user["elder_id"],
                 "phone": user["phone"],
+                "email": user["email"],
                 "passcode_hash": hashed,
                 "created_at": datetime.now(timezone.utc).isoformat(),
             }

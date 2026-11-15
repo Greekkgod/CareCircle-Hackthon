@@ -238,6 +238,39 @@
           <button type="submit" class="btn-primary">Save Appointment</button>
         </form>
       </article>
+
+      <!-- Escalation Ladder & Cloud Scheduler Simulation -->
+      <article class="card-box" aria-labelledby="escalation-sim-heading">
+        <h2 id="escalation-sim-heading" class="section-title">⏱️ Escalation Ladder &amp; Cloud Scheduler Simulator</h2>
+        <p style="color: var(--text-secondary); margin-bottom: 16px;">
+          Test the pure escalation ladder: <strong>Elder Reminder</strong> &rarr; <strong>+15m Caretaker Alert</strong> &rarr; <strong>+30m Family Escalation</strong>, plus quiet hours digest batching and idempotent sent-logs.
+        </p>
+
+        <div style="display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 16px;">
+          <button type="button" class="btn-primary" onclick="CareApp.simulateLadderStep('due')">
+            ⏰ 1. Due (08:00) &rarr; Elder
+          </button>
+          <button type="button" class="btn-primary" style="background: var(--color-warning);" onclick="CareApp.simulateLadderStep('caretaker')">
+            ⚠️ 2. +15m (08:15) &rarr; Caretaker
+          </button>
+          <button type="button" class="btn-primary" style="background: var(--color-emergency);" onclick="CareApp.simulateLadderStep('family')">
+            🚨 3. +30m (08:30) &rarr; Family
+          </button>
+          <button type="button" class="btn-secondary" onclick="CareApp.simulateLadderStep('quiet')">
+            🌙 Quiet Hours (23:00)
+          </button>
+          <button type="button" class="btn-secondary" onclick="CareApp.resetSimulationClock()">
+            🔄 Reset Clock
+          </button>
+        </div>
+
+        <div id="sim-status-box" style="padding: 16px; background: var(--bg-primary); border-radius: 12px; border: 1px solid var(--bg-card-alt);">
+          <div style="font-weight: bold; margin-bottom: 8px;">Simulation Output:</div>
+          <div id="sim-output-text" style="font-family: monospace; font-size: 16px; color: var(--text-secondary);">
+            Click a simulation step above to evaluate the pure escalation engine ladder.
+          </div>
+        </div>
+      </article>
     </section>
 
     <!-- ========================================== -->

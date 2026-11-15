@@ -688,6 +688,71 @@ const CareApp = (() => {
     }
   }
 
+  /**
+   * Simulate a specific escalation ladder step or time condition.
+   */
+  async function simulateLadderStep(step) {
+    const out = document.getElementById("sim-output-text");
+    if (out) out.textContent = "Simulating escalation step...";
+
+    const body = { elder_id: "elder_1", advance_minutes: 0 };
+    if (step === "due") {
+      body.simulated_now = "2026-11-15T08:00:00Z";
+    } else if (step === "caretaker") {
+      body.simulated_now = "2026-11-15T08:15:00Z";
+    } else if (step === "family") {
+      body.simulated_now = "2026-11-15T08:30:00Z";
+    } else if (step === "quiet") {
+      body.simulated_now = "2026-11-15T23:00:00Z";
+    }
+
+    try {
+      const res = await apiFetch("/api/simulation/simulate-time", {
+        method: "POST",
+        body: JSON.stringify(body),
+      });
+      if (out) {
+        const details = [
+          `Simulated Time: ${res.simulated_time}`,
+          `Quiet Hours: ${res.is_quiet_hours ? "YES (🌙 Low priority batched into digest)" : "NO (☀️ Active daytime)"}`,
+          `Notifications Sent: ${res.notifications_sent.length}`,
+          `Batched for Digest: ${res.notifications_batched.length}`,
+          `Summary: ${res.summary}`,
+        ];
+        if (res.notifications_sent.length > 0) {
+          details.push("\nDispatched Notifications:");
+          res.notifications_sent.forEach((s) => {
+            details.push(`  → [${s.recipient_role || s.role || 'alert'}] To: ${s.recipient_email || s.recipient} | ${s.subject}`);
+          });
+        }
+        if (res.notifications_batched.length > 0) {
+          details.push("\nBatched for Digest Queue:");
+          res.notifications_batched.forEach((b) => {
+            details.push(`  → [${b.recipient_role}] ${b.medication_name}: ${b.reason}`);
+          });
+        }
+        out.textContent = details.join("\n");
+      }
+      announce(res.summary);
+    } catch (err) {
+      if (out) out.textContent = `Error during simulation: ${err.message}`;
+    }
+  }
+
+  /**
+   * Reset the simulation clock back to real system time.
+   */
+  async function resetSimulationClock() {
+    const out = document.getElementById("sim-output-text");
+    try {
+      const res = await apiFetch("/api/simulation/reset-clock", { method: "POST" });
+      if (out) out.textContent = `${res.message} (${res.current_time})`;
+      announce("Simulation clock reset");
+    } catch (err) {
+      if (out) out.textContent = `Error resetting clock: ${err.message}`;
+    }
+  }
+
   return {
     init,
     switchRole,
@@ -704,6 +769,8 @@ const CareApp = (() => {
     sendFamilyNote,
     loadSampleText,
     decideChangeRequest,
+    simulateLadderStep,
+    resetSimulationClock,
   };
 })();
 

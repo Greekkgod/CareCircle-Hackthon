@@ -19,6 +19,7 @@ from app.routes import (
     auth,
     change_requests,
     checkins,
+    escalation,
     medications,
 )
 from app.services.auth_service import seed_default_users
@@ -61,6 +62,7 @@ app.include_router(appointments.router)
 app.include_router(change_requests.router)
 app.include_router(ai_assistant.router)
 app.include_router(checkins.router)
+app.include_router(escalation.router)
 
 
 @app.get("/health", tags=["Health"])

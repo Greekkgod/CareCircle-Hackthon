@@ -40,6 +40,27 @@ class Settings(BaseSettings):
     jwt_algorithm: str = "HS256"
     access_token_expire_minutes: int = 1440
 
+    # Cloud Scheduler & Internal API Protection
+    cron_secret: str = "carecircle-internal-scheduler-secret-2026"
+
+    # Email & Notifications
+    use_mock_email: bool = True
+    smtp_host: str = "localhost"
+    smtp_port: int = 587
+    smtp_user: str = ""
+    smtp_password: str = ""
+    smtp_from: str = "notifications@carecircle.app"
+    smtp_use_tls: bool = True
+
+    # Escalation Ladder & Timing Defaults (in minutes)
+    escalation_elder_grace_minutes: int = 0
+    escalation_caretaker_delay_minutes: int = 15
+    escalation_family_delay_minutes: int = 30
+
+    # Quiet Hours (24-hour format)
+    quiet_hours_start: int = 22
+    quiet_hours_end: int = 7
+
     # Allowed CORS origins
     allowed_origins: List[str] = ["*"]
 
