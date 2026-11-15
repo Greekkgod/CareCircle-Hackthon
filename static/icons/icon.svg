@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <rect width="512" height="512" rx="128" fill="#1E3A8A"/>
+  <circle cx="256" cy="256" r="210" fill="#2563EB" opacity="0.4"/>
+  <!-- Heart & Care Pill Icon -->
+  <path d="M256 410 C210 370 120 290 120 200 C120 145 165 100 220 100 C240 100 256 112 256 112 C256 112 272 100 292 100 C347 100 392 145 392 200 C392 290 302 370 256 410 Z" fill="#F43F5E"/>
+  <g transform="translate(186, 170) rotate(-45)">
+    <rect x="0" y="0" width="140" height="60" rx="30" fill="#FFFFFF"/>
+    <path d="M0 30 A30 30 0 0 1 30 0 L70 0 L70 60 L30 60 A30 30 0 0 1 0 30 Z" fill="#10B981"/>
+    <line x1="70" y1="0" x2="70" y2="60" stroke="#CBD5E1" stroke-width="4"/>
+  </g>
+</svg>

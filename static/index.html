@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="CareCircle - Accessible elderly care, medication scheduling, and family reassurance.">
+  <meta name="theme-color" content="#1E3A8A">
+  <title>CareCircle - Elderly Care & Medication Platform</title>
+  
+  <link rel="manifest" href="/manifest.webmanifest">
+  <link rel="icon" href="/static/icons/icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/static/css/app.css">
+</head>
+<body>
+  <!-- Keyboard Accessible Skip Link -->
+  <a href="#main-content" class="skip-link">Skip to main content</a>
+
+  <!-- ARIA Live Region for Screen Readers -->
+  <div id="aria-status" role="status" aria-live="polite" class="sr-live-region"></div>
+
+  <!-- Header Navigation -->
+  <header class="app-header">
+    <div class="nav-container">
+      <a href="/" class="brand" aria-label="CareCircle Home">
+        <img src="/static/icons/icon.svg" alt="" class="brand-icon" aria-hidden="true">
+        <span>CareCircle</span>
+      </a>
+
+      <nav aria-label="Role and Profile Switcher" class="role-switcher">
+        <label id="role-selector-label" for="elder-tab">View Mode:</label>
+        <button id="elder-tab" class="role-btn active" aria-pressed="true" onclick="CareApp.switchRole('elder')">
+          👵 Elder
+        </button>
+        <button id="caretaker-tab" class="role-btn" aria-pressed="false" onclick="CareApp.switchRole('caretaker')">
+          🩺 Caretaker
+        </button>
+        <button id="family-tab" class="role-btn" aria-pressed="false" onclick="CareApp.switchRole('family')">
+          ❤️ Family
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Main Application Body -->
+  <main id="main-content" class="app-main">
+    <!-- Visual Alert/Status Banner -->
+    <div id="status-banner" class="status-banner" role="alert" aria-atomic="true"></div>
+
+    <!-- ========================================== -->
+    <!-- 1. ELDER VIEW (Ultra-simplified, Large, High Contrast) -->
+    <!-- ========================================== -->
+    <section id="elder-view" class="elder-view" aria-labelledby="elder-view-heading">
+      <h1 id="elder-view-heading" class="sr-live-region">Elder Dashboard</h1>
+
+      <!-- Emergency SOS Card -->
+      <div class="sos-card">
+        <h2 style="font-size: 26px; color: #FCA5A5;">Need Immediate Help?</h2>
+        <p style="font-size: 20px; color: #FEE2E2; margin-top: 4px;">Pressing this button will instantly alert your caregiver and family.</p>
+        <button id="btn-elder-sos" class="btn-emergency" onclick="CareApp.triggerSOS()" aria-label="Emergency Help Button. Instantly alerts caretakers and family.">
+          🚨 EMERGENCY HELP
+        </button>
+      </div>
+
+      <!-- Personalized Greeting & Audio Readout -->
+      <article class="greeting-banner">
+        <div class="greeting-title" id="elder-greeting">Good day, Rose!</div>
+        <p style="font-size: 22px; color: var(--text-secondary); margin-top: 8px;">
+          Here is your medication plan for today. You are doing wonderful!
+        </p>
+        <button class="readout-btn" onclick="CareApp.readScheduleAloud()" aria-label="Read my medication schedule aloud using speech audio">
+          🔊 Read My Schedule Aloud
+        </button>
+      </article>
+
+      <!-- Daily Wellness Check-In -->
+      <section class="checkin-section" aria-labelledby="checkin-heading">
+        <h2 id="checkin-heading" class="section-title">How are you feeling right now?</h2>
+        <p style="color: var(--text-secondary); font-size: 20px;">Tap one button to let your loved ones know:</p>
+        <div class="checkin-options">
+          <button class="btn-mood btn-mood-great" onclick="CareApp.submitCheckin('GREAT')" aria-label="I feel Great today">
+            <span style="font-size: 32px;" aria-hidden="true">😊</span>
+            <span>I Feel Great!</span>
+          </button>
+          <button class="btn-mood btn-mood-okay" onclick="CareApp.submitCheckin('OKAY')" aria-label="I feel Okay today">
+            <span style="font-size: 32px;" aria-hidden="true">😐</span>
+            <span>I Feel Okay</span>
+          </button>
+          <button class="btn-mood btn-mood-help" onclick="CareApp.submitCheckin('NEED_HELP')" aria-label="I Need A Check-In or Help">
+            <span style="font-size: 32px;" aria-hidden="true">🙋</span>
+            <span>Need A Check-In</span>
+          </button>
+        </div>
+      </section>
+
+      <!-- Elder Medications List -->
+      <section aria-labelledby="elder-meds-heading">
+        <h2 id="elder-meds-heading" class="section-title">Your Medications</h2>
+        <div id="elder-meds-container" class="meds-grid">
+          <!-- Dynamically populated medication cards -->
+        </div>
+      </section>
+
+      <!-- Upcoming Appointments -->
+      <section aria-labelledby="elder-appts-heading">
+        <h2 id="elder-appts-heading" class="section-title">Your Doctor Visits</h2>
+        <div id="elder-appts-container" class="meds-grid">
+          <!-- Dynamically populated appointments -->
+        </div>
+      </section>
+    </section>
+
+    <!-- ========================================== -->
+    <!-- 2. CARETAKER VIEW (Management, AI Scanner, Confirmation) -->
+    <!-- ========================================== -->
+    <section id="caretaker-view" class="caretaker-view" style="display: none;" aria-labelledby="caretaker-heading">
+      <h1 id="caretaker-heading" class="section-title">Caretaker Clinical Console</h1>
+
+      <!-- Active Emergencies Alert Feed -->
+      <div id="caretaker-emergencies-box" class="card-box" style="display: none; border-color: #EF4444; background: #450A0A;">
+        <h2 style="color: #FCA5A5; font-size: 24px;">🚨 Active Emergency Alerts</h2>
+        <div id="caretaker-emergencies-list"></div>
+      </div>
+
+      <!-- Quick Metrics -->
+      <div class="stats-grid">
+        <div class="stat-item">
+          <div class="stat-number" id="caretaker-adherence-stat">--%</div>
+          <div class="stat-label">Adherence Rate</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-number" id="caretaker-logged-stat">0</div>
+          <div class="stat-label">Total Doses Logged</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-number" id="caretaker-refills-stat">0</div>
+          <div class="stat-label">Refills Needed</div>
+        </div>
+      </div>
+
+      <!-- AI Clinical Prescription Scanner (Strict Human Confirmation) -->
+      <article class="ai-scanner-box" aria-labelledby="ai-scanner-heading">
+        <h2 id="ai-scanner-heading" style="font-size: 26px; color: #DDD6FE; display: flex; align-items: center; gap: 8px;">
+          🤖 AI Prescription &amp; Note Assistant
+        </h2>
+        <p style="font-size: 20px; color: var(--text-secondary); margin-top: 4px;">
+          Paste doctor discharge instructions or caregiver notes. AI drafts proposals that
+          <strong>require your confirmation</strong> before anything is saved.
+        </p>
+
+        <div style="margin-top: 12px;">
+          <span class="badge-pii">🛡️ PII Auto-Redacted (Names, phones, SSNs masked)</span>
+          <span class="badge-pii" style="background: #3B0764; border-color: #A855F7; color: #F3E8FF;">
+            🤝 Human-in-the-Loop Required
+          </span>
+        </div>
+
+        <form id="ai-parse-form" onsubmit="CareApp.handleAIExtract(event)" style="margin-top: 16px;">
+          <div class="form-group">
+            <label for="ai-raw-text">Prescription or Doctor Note Text:</label>
+            <textarea id="ai-raw-text" rows="4" required aria-describedby="ai-hint">Patient: Rose Dawson, DOB: 04/12/1944. Phone: (555) 234-5678. Start Lisinopril 10mg once daily in morning with food. Metformin 500mg twice daily with meals. Scheduled follow-up appointment with Dr. Adams at Metro Cardiology on Friday at 10:00 AM.</textarea>
+            <small id="ai-hint" style="color: var(--text-muted); font-size: 16px;">
+              Sample text includes personal details to demonstrate automatic PII redaction.
+            </small>
+          </div>
+          <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+            <button type="submit" class="btn-primary" id="btn-parse-ai">
+              ✨ Scan &amp; Generate Drafts
+            </button>
+            <button type="button" class="btn-secondary" onclick="CareApp.loadSampleText()">
+              Reset Sample Text
+            </button>
+          </div>
+        </form>
+
+        <!-- Container for AI Drafts pending confirmation -->
+        <div id="ai-drafts-list" style="margin-top: 24px;"></div>
+      </article>
+
+      <!-- Add Medication Manually -->
+      <article class="card-box" aria-labelledby="add-med-heading">
+        <h2 id="add-med-heading" class="section-title">Add Medication Manually</h2>
+        <form id="manual-med-form" onsubmit="CareApp.handleManualMed(event)">
+          <div class="form-group">
+            <label for="med-name-input">Medication Name:</label>
+            <input type="text" id="med-name-input" placeholder="e.g. Amlodipine" required>
+          </div>
+          <div class="form-group">
+            <label for="med-dosage-input">Dosage:</label>
+            <input type="text" id="med-dosage-input" placeholder="e.g. 5 mg, 1 tablet" required>
+          </div>
+          <div class="form-group">
+            <label for="med-instructions-input">Instructions:</label>
+            <input type="text" id="med-instructions-input" placeholder="e.g. Take with breakfast" required>
+          </div>
+          <div class="form-group">
+            <label for="med-time-input">Scheduled Time (e.g. 08:00, 20:00):</label>
+            <input type="text" id="med-time-input" value="08:00" required>
+          </div>
+          <div class="form-group">
+            <label for="med-refills-input">Remaining Refills (Pills):</label>
+            <input type="number" id="med-refills-input" value="30" min="0" required>
+          </div>
+          <button type="submit" class="btn-primary">Save Medication</button>
+        </form>
+      </article>
+
+      <!-- Add Appointment Manually -->
+      <article class="card-box" aria-labelledby="add-appt-heading">
+        <h2 id="add-appt-heading" class="section-title">Schedule Doctor Visit</h2>
+        <form id="manual-appt-form" onsubmit="CareApp.handleManualAppt(event)">
+          <div class="form-group">
+            <label for="appt-title-input">Appointment Title:</label>
+            <input type="text" id="appt-title-input" placeholder="e.g. Eye Specialist Checkup" required>
+          </div>
+          <div class="form-group">
+            <label for="appt-doctor-input">Doctor Name:</label>
+            <input type="text" id="appt-doctor-input" placeholder="e.g. Dr. Jennifer Davis" required>
+          </div>
+          <div class="form-group">
+            <label for="appt-loc-input">Location / Clinic:</label>
+            <input type="text" id="appt-loc-input" placeholder="e.g. City Health Center, Room 204" required>
+          </div>
+          <div class="form-group">
+            <label for="appt-time-input">Date &amp; Time:</label>
+            <input type="text" id="appt-time-input" placeholder="e.g. Next Tuesday at 2:00 PM" required>
+          </div>
+          <button type="submit" class="btn-primary">Save Appointment</button>
+        </form>
+      </article>
+    </section>
+
+    <!-- ========================================== -->
+    <!-- 3. FAMILY VIEW (Reassurance, Peace of Mind) -->
+    <!-- ========================================== -->
+    <section id="family-view" class="family-view" style="display: none;" aria-labelledby="family-heading">
+      <h1 id="family-heading" class="section-title">Family Reassurance &amp; Peace of Mind</h1>
+
+      <div class="greeting-banner">
+        <div class="greeting-title">Welcome, David!</div>
+        <p style="font-size: 22px; color: var(--text-secondary); margin-top: 8px;">
+          Here is real-time status and daily reassurance for Grandma Rose.
+        </p>
+      </div>
+
+      <!-- Quick Status Overview -->
+      <div class="stats-grid">
+        <div class="stat-item">
+          <div class="stat-number" id="family-latest-mood">😊 Great</div>
+          <div class="stat-label">Latest Mood Check-in</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-number" id="family-adherence-rate">100%</div>
+          <div class="stat-label">Adherence Score</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-number" id="family-emergency-status">🟢 Clear</div>
+          <div class="stat-label">Safety Status</div>
+        </div>
+      </div>
+
+      <!-- Medication Activity Timeline -->
+      <article class="card-box" aria-labelledby="timeline-heading">
+        <h2 id="timeline-heading" class="section-title">Recent Medication Timeline</h2>
+        <div id="family-timeline-list">
+          <p style="color: var(--text-muted);">Loading recent logs...</p>
+        </div>
+      </article>
+
+      <!-- Send Love / Encouragement Note -->
+      <article class="card-box" aria-labelledby="note-heading">
+        <h2 id="note-heading" class="section-title">Send a Loving Message to Grandma</h2>
+        <form onsubmit="CareApp.sendFamilyNote(event)">
+          <div class="form-group">
+            <label for="family-note-text">Your message:</label>
+            <input type="text" id="family-note-text" placeholder="e.g. Love you Grandma, see you on Sunday!" required>
+          </div>
+          <button type="submit" class="btn-primary">💌 Send to Grandma's Screen</button>
+        </form>
+      </article>
+    </section>
+  </main>
+
+  <!-- Passcode Switch / Sign-in Modal Dialog -->
+  <dialog id="auth-dialog" style="padding: 24px; border-radius: var(--border-radius); background: #1E293B; color: #FFFFFF; border: 3px solid #3B82F6; max-width: 440px; margin: auto;">
+    <form method="dialog" onsubmit="CareApp.submitPasscode(event)">
+      <h2 style="font-size: 26px; margin-bottom: 12px;" id="auth-dialog-title">Enter Passcode</h2>
+      <p id="auth-dialog-desc" style="font-size: 18px; color: var(--text-secondary); margin-bottom: 16px;">
+        Please enter your passcode or PIN to access this role.
+      </p>
+
+      <div class="form-group">
+        <label for="dialog-passcode-input">Passcode / PIN:</label>
+        <input type="password" id="dialog-passcode-input" required minlength="4" placeholder="Enter PIN">
+      </div>
+
+      <div id="dialog-rate-limit-msg" style="color: #F87171; font-size: 16px; margin-bottom: 12px; display: none;"></div>
+
+      <div style="display: flex; gap: 12px; justify-content: flex-end;">
+        <button type="button" class="btn-secondary" onclick="document.getElementById('auth-dialog').close()">Cancel</button>
+        <button type="submit" class="btn-primary">Unlock</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- Footer -->
+  <footer class="app-footer">
+    <p>CareCircle &copy; 2026. Built with Python 3.12, FastAPI, Firestore, &amp; Gemini API.</p>
+    <p style="margin-top: 4px; font-size: 16px;">Designed for Seniors, Caretakers, and Families. Accessible &amp; Secure.</p>
+  </footer>
+
+  <script src="/static/js/app.js"></script>
+</body>
+</html>
