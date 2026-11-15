@@ -84,10 +84,12 @@ app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
 
 @app.get("/")
 async def serve_index():
-    """Serve the single page PWA index application."""
+    """Serve the single page PWA index application with no-cache to guarantee live updates."""
     index_path = STATIC_DIR / "index.html"
     if index_path.exists():
-        return FileResponse(index_path, media_type="text/html")
+        response = FileResponse(index_path, media_type="text/html")
+        response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+        return response
     return {"message": "Welcome to CareCircle API. Visit /docs for OpenAPI specifications."}
 
 
@@ -100,8 +102,9 @@ async def serve_manifest():
 
 @app.get("/sw.js")
 async def serve_service_worker():
-    """Serve the PWA service worker with appropriate Service-Worker-Allowed header."""
+    """Serve the PWA service worker with appropriate Service-Worker-Allowed header and no-cache."""
     sw_path = STATIC_DIR / "sw.js"
     response = FileResponse(sw_path, media_type="application/javascript")
     response.headers["Service-Worker-Allowed"] = "/"
+    response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
     return response

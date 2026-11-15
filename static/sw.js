@@ -4,8 +4,8 @@
  * and caches today's medication schedule for resilient offline senior access.
  */
 
-const STATIC_CACHE = "carecircle-static-v2";
-const API_CACHE = "carecircle-api-v2";
+const STATIC_CACHE = "carecircle-static-v3";
+const API_CACHE = "carecircle-api-v3";
 
 const STATIC_ASSETS = [
   "/",
@@ -15,7 +15,7 @@ const STATIC_ASSETS = [
   "/manifest.webmanifest"
 ];
 
-// Install: precache static shell assets
+// Install: precache static shell assets and immediately skip waiting
 self.addEventListener("install", (event) => {
   event.waitUntil(
     caches.open(STATIC_CACHE).then((cache) => {
@@ -24,7 +24,7 @@ self.addEventListener("install", (event) => {
   );
 });
 
-// Activate: clean up outdated cache buckets
+// Activate: clean up outdated cache buckets and claim clients immediately
 self.addEventListener("activate", (event) => {
   event.waitUntil(
     caches.keys().then((keys) => {
@@ -83,13 +83,10 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  // 2. Static Assets: Cache-first, network fallback
+  // 2. Static Assets: Network-first, cache fallback (ensures updates are live immediately)
   event.respondWith(
-    caches.match(event.request).then((cachedResponse) => {
-      if (cachedResponse) {
-        return cachedResponse;
-      }
-      return fetch(event.request).then((networkResponse) => {
+    fetch(event.request)
+      .then((networkResponse) => {
         if (networkResponse && networkResponse.status === 200) {
           const clone = networkResponse.clone();
           caches.open(STATIC_CACHE).then((cache) => {
@@ -97,7 +94,13 @@ self.addEventListener("fetch", (event) => {
           });
         }
         return networkResponse;
-      });
-    })
+      })
+      .catch(async () => {
+        const cached = await caches.match(event.request);
+        if (cached) {
+          return cached;
+        }
+        return new Response("Offline mode. Asset not in cache.", { status: 503 });
+      })
   );
 });

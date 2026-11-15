@@ -1490,7 +1490,9 @@ const CareApp = (() => {
   function registerServiceWorker() {
     if ("serviceWorker" in navigator) {
       window.addEventListener("load", () => {
-        navigator.serviceWorker.register("/sw.js").catch((err) => {
+        navigator.serviceWorker.register("/sw.js?v=20261115-3").then((reg) => {
+          reg.update();
+        }).catch((err) => {
           console.warn("ServiceWorker registration failed:", err);
         });
       });
