@@ -1,9 +1,12 @@
 /**
- * CareCircle Service Worker
- * Provides offline caching, fast asset loading, and network-first API requests.
+ * CareCircle Progressive Web App Service Worker
+ * Provides offline caching for application shell, static assets,
+ * and caches today's medication schedule for resilient offline senior access.
  */
 
-const CACHE_NAME = "carecircle-v1";
+const STATIC_CACHE = "carecircle-static-v2";
+const API_CACHE = "carecircle-api-v2";
+
 const STATIC_ASSETS = [
   "/",
   "/static/css/app.css",
@@ -12,20 +15,22 @@ const STATIC_ASSETS = [
   "/manifest.webmanifest"
 ];
 
+// Install: precache static shell assets
 self.addEventListener("install", (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
+    caches.open(STATIC_CACHE).then((cache) => {
       return cache.addAll(STATIC_ASSETS);
     }).then(() => self.skipWaiting())
   );
 });
 
+// Activate: clean up outdated cache buckets
 self.addEventListener("activate", (event) => {
   event.waitUntil(
     caches.keys().then((keys) => {
       return Promise.all(
         keys.map((key) => {
-          if (key !== CACHE_NAME) {
+          if (key !== STATIC_CACHE && key !== API_CACHE) {
             return caches.delete(key);
           }
         })
@@ -34,29 +39,51 @@ self.addEventListener("activate", (event) => {
   );
 });
 
+// Fetch: Strategy for shell and API requests
 self.addEventListener("fetch", (event) => {
   const url = new URL(event.request.url);
 
-  // For API calls: Network-first
+  // 1. API Calls (Medications & Appointments Schedule)
   if (url.pathname.startsWith("/api/")) {
-    event.respondWith(
-      fetch(event.request).catch(() => {
-        return new Response(
-          JSON.stringify({
-            error: "Offline mode active. Please check internet connection.",
-            offline: true
-          }),
-          {
-            status: 503,
-            headers: { "Content-Type": "application/json" }
-          }
-        );
-      })
-    );
+    if (event.request.method === "GET") {
+      // Network-first with API cache fallback for offline schedule access
+      event.respondWith(
+        fetch(event.request)
+          .then((networkResponse) => {
+            if (networkResponse && networkResponse.status === 200) {
+              const clone = networkResponse.clone();
+              caches.open(API_CACHE).then((cache) => {
+                cache.put(event.request, clone);
+              });
+            }
+            return networkResponse;
+          })
+          .catch(async () => {
+            const cached = await caches.match(event.request);
+            if (cached) {
+              return cached;
+            }
+            return new Response(
+              JSON.stringify({
+                offline: true,
+                message: "Offline mode. Showing cached medication schedule.",
+                data: []
+              }),
+              {
+                status: 200,
+                headers: { "Content-Type": "application/json" }
+              }
+            );
+          })
+      );
+      return;
+    }
+
+    // For POST/PATCH mutations when offline: pass through or handle client queue
     return;
   }
 
-  // For static assets: Cache-first, fallback to network
+  // 2. Static Assets: Cache-first, network fallback
   event.respondWith(
     caches.match(event.request).then((cachedResponse) => {
       if (cachedResponse) {
@@ -64,9 +91,9 @@ self.addEventListener("fetch", (event) => {
       }
       return fetch(event.request).then((networkResponse) => {
         if (networkResponse && networkResponse.status === 200) {
-          const responseClone = networkResponse.clone();
-          caches.open(CACHE_NAME).then((cache) => {
-            cache.put(event.request, responseClone);
+          const clone = networkResponse.clone();
+          caches.open(STATIC_CACHE).then((cache) => {
+            cache.put(event.request, clone);
           });
         }
         return networkResponse;

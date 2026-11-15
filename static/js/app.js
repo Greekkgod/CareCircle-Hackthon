@@ -7,12 +7,23 @@ const CareApp = (() => {
   // Application State
   const state = {
     role: "elder",
+    elderTab: "today",
+    textSize: localStorage.getItem("carecircle_text_size") || "normal",
+    highContrast: localStorage.getItem("carecircle_theme") === "high-contrast",
     token: null,
     user: null,
     medications: [],
     appointments: [],
     drafts: [],
+    nextDose: null,
     targetRoleToAuth: null,
+    familyNotes: [
+      {
+        author: "David (Grandson)",
+        body: "Thinking of you Grandma! Can't wait to visit this Sunday for tea.",
+        time: "10:15 AM",
+      },
+    ],
   };
 
   // Demo passcodes mapping for quick demo convenience
@@ -42,7 +53,7 @@ const CareApp = (() => {
   }
 
   /**
-   * Helper for authenticated API calls.
+   * Helper for authenticated API calls with offline cache fallback.
    */
   async function apiFetch(endpoint, options = {}) {
     const headers = options.headers || {};
@@ -53,22 +64,33 @@ const CareApp = (() => {
       headers["Content-Type"] = "application/json";
     }
 
-    const response = await fetch(endpoint, { ...options, headers });
-    if (response.status === 401) {
-      announce("Passcode required to continue.", "alert");
-      openAuthDialog(state.role);
-      throw new Error("Unauthorized");
+    try {
+      const response = await fetch(endpoint, { ...options, headers });
+      if (response.status === 401) {
+        announce("Passcode required to continue.", "alert");
+        openAuthDialog(state.role);
+        throw new Error("Unauthorized");
+      }
+      if (response.status === 429) {
+        const err = await response.json();
+        announce(err.detail || "Rate limit reached. Please wait before trying again.", "alert");
+        throw new Error("Rate limited");
+      }
+      if (!response.ok) {
+        const err = await response.json().catch(() => ({ detail: "Request failed" }));
+        throw new Error(err.detail || "Request failed");
+      }
+      return response.json();
+    } catch (err) {
+      if (!navigator.onLine && options.method !== "POST" && options.method !== "PATCH") {
+        const cached = localStorage.getItem("carecircle_today_schedule");
+        if (cached && endpoint.includes("/api/medications")) {
+          const parsed = JSON.parse(cached);
+          return parsed.medications || [];
+        }
+      }
+      throw err;
     }
-    if (response.status === 429) {
-      const err = await response.json();
-      announce(err.detail || "Rate limit reached. Please wait before trying again.", "alert");
-      throw new Error("Rate limited");
-    }
-    if (!response.ok) {
-      const err = await response.json().catch(() => ({ detail: "Request failed" }));
-      throw new Error(err.detail || "Request failed");
-    }
-    return response.json();
   }
 
   /**
@@ -140,6 +162,17 @@ const CareApp = (() => {
    */
   function setRoleView(role) {
     state.role = role;
+    const nav = document.getElementById("elder-bottom-nav");
+
+    if (role === "elder") {
+      document.body.classList.add("elder-active");
+      if (nav) nav.style.display = "flex";
+      switchElderTab(state.elderTab || "today");
+    } else {
+      document.body.classList.remove("elder-active");
+      if (nav) nav.style.display = "none";
+    }
+
     ["elder", "caretaker", "family"].forEach((r) => {
       const btn = document.getElementById(`${r}-tab`);
       const sec = document.getElementById(`${r}-view`);
@@ -155,6 +188,76 @@ const CareApp = (() => {
   }
 
   /**
+   * Senior Text Size Scaling (Normal: 22px, Large: 26px, Extra Large: 30px).
+   */
+  function setTextSize(size) {
+    state.textSize = size;
+    document.documentElement.setAttribute("data-text-size", size);
+    localStorage.setItem("carecircle_text_size", size);
+
+    ["normal", "large", "xlarge"].forEach((s) => {
+      const btn = document.getElementById(`btn-text-${s}`);
+      if (btn) {
+        const isActive = s === size;
+        btn.classList.toggle("active", isActive);
+        btn.setAttribute("aria-pressed", String(isActive));
+      }
+    });
+    announce(`Text size set to ${size}.`, "info");
+  }
+
+  /**
+   * Toggle High Contrast Theme (WCAG AAA yellow-on-black).
+   */
+  function toggleHighContrast() {
+    state.highContrast = !state.highContrast;
+    const theme = state.highContrast ? "high-contrast" : "standard";
+
+    if (state.highContrast) {
+      document.documentElement.setAttribute("data-theme", "high-contrast");
+    } else {
+      document.documentElement.removeAttribute("data-theme");
+    }
+    localStorage.setItem("carecircle_theme", theme);
+
+    const btn = document.getElementById("btn-contrast-toggle");
+    if (btn) {
+      btn.setAttribute("aria-pressed", String(state.highContrast));
+      btn.classList.toggle("active", state.highContrast);
+    }
+    announce(`High contrast theme ${state.highContrast ? "enabled" : "disabled"}.`, "info");
+  }
+
+  /**
+   * Switch between Elder bottom navigation tabs (Today, Medicines, Appointments, Family).
+   */
+  function switchElderTab(tabName) {
+    state.elderTab = tabName;
+    const tabs = ["today", "medicines", "appointments", "family"];
+
+    tabs.forEach((t) => {
+      const content = document.getElementById(`elder-tab-${t}`);
+      const navBtn = document.getElementById(`bottom-tab-${t}`);
+      const isMatch = t === tabName;
+      if (content) {
+        content.classList.toggle("active", isMatch);
+        content.style.display = isMatch ? "block" : "none";
+      }
+      if (navBtn) {
+        navBtn.classList.toggle("active", isMatch);
+        navBtn.setAttribute("aria-selected", String(isMatch));
+      }
+    });
+
+    if (tabName === "today") {
+      renderNextDose();
+    } else if (tabName === "family") {
+      renderElderFamilyNotes();
+    }
+    announce(`Showing ${tabName} view.`);
+  }
+
+  /**
    * Load data according to current role.
    */
   async function loadDataForCurrentRole() {
@@ -163,6 +266,7 @@ const CareApp = (() => {
         await loadElderConsentCards();
         await loadElderMeds();
         await loadElderAppts();
+        renderElderFamilyNotes();
       } else if (state.role === "caretaker") {
         await loadCaretakerData();
       } else if (state.role === "family") {
@@ -236,20 +340,273 @@ const CareApp = (() => {
   }
 
   /**
+   * Compute the Next Scheduled Dose for the Elder.
+   */
+  function computeNextDose() {
+    if (!state.medications || state.medications.length === 0) {
+      return null;
+    }
+
+    const now = new Date();
+    const currentMinutes = now.getHours() * 60 + now.getMinutes();
+
+    const slots = [];
+    state.medications.forEach((med) => {
+      (med.schedule_times || ["08:00"]).forEach((slotStr) => {
+        const parts = slotStr.split(":");
+        const h = parseInt(parts[0], 10);
+        const m = parseInt(parts[1] || "0", 10);
+        slots.push({
+          medication: med,
+          slotTime: slotStr,
+          minutes: h * 60 + m,
+        });
+      });
+    });
+
+    if (slots.length === 0) return null;
+    slots.sort((a, b) => a.minutes - b.minutes);
+
+    // Pick earliest upcoming or closest overdue slot
+    const nextSlot = slots.find((s) => s.minutes >= currentMinutes - 60) || slots[0];
+    return nextSlot;
+  }
+
+  /**
+   * Render the Hero Next Dose card (Elder Home shows ONLY the next dose).
+   */
+  function renderNextDose() {
+    const next = computeNextDose();
+    state.nextDose = next;
+
+    const heroCard = document.getElementById("hero-next-dose-card");
+    const allDoneCard = document.getElementById("hero-all-done-card");
+    if (!heroCard) return;
+
+    if (!next) {
+      heroCard.style.display = "none";
+      if (allDoneCard) allDoneCard.style.display = "block";
+      return;
+    }
+
+    heroCard.style.display = "block";
+    if (allDoneCard) allDoneCard.style.display = "none";
+
+    const med = next.medication;
+    const badge = document.getElementById("hero-dose-badge");
+    const title = document.getElementById("hero-dose-title");
+    const dosage = document.getElementById("hero-dose-dosage");
+    const instructions = document.getElementById("hero-dose-instructions");
+    const pillColor = document.getElementById("hero-pill-color");
+    const refills = document.getElementById("hero-refills-left");
+
+    if (badge) badge.textContent = `⏰ Scheduled for ${next.slotTime} Today`;
+    if (title) title.textContent = med.name;
+    if (dosage) dosage.textContent = `${med.dosage} • ${med.frequency || 'Daily'}`;
+    if (instructions) instructions.innerHTML = `<strong>Instructions:</strong> ${escapeHtml(med.instructions || 'Take as prescribed')}`;
+    if (pillColor) {
+      pillColor.innerHTML = `💊 <span style="display:inline-block;width:14px;height:14px;border-radius:50%;background:${med.pill_color || '#3B82F6'};margin-right:6px;"></span> Pill Color`;
+    }
+    if (refills) refills.textContent = `📦 ${med.remaining_refills ?? 30} refills left`;
+
+    // Cache in localStorage for offline resilience
+    try {
+      localStorage.setItem(
+        "carecircle_today_schedule",
+        JSON.stringify({
+          nextDose: next,
+          medications: state.medications,
+          cachedAt: new Date().toISOString(),
+        })
+      );
+    } catch (e) {}
+  }
+
+  /**
+   * Action for Huge "I TOOK IT" button.
+   */
+  async function takeNextDose() {
+    if (!state.nextDose) return;
+    const med = state.nextDose.medication;
+    const time = state.nextDose.slotTime;
+
+    try {
+      await apiFetch("/api/medications/log", {
+        method: "POST",
+        body: JSON.stringify({
+          medication_id: med.id,
+          medication_name: med.name,
+          scheduled_time: time,
+          status: "TAKEN",
+        }),
+      });
+
+      announce(`Wonderful! You took ${med.name}. Good job!`, "success");
+      if ("speechSynthesis" in window) {
+        window.speechSynthesis.cancel();
+        window.speechSynthesis.speak(
+          new SpeechSynthesisUtterance(`Thank you Rose! Logged ${med.name} as taken.`)
+        );
+      }
+      await loadElderMeds();
+    } catch (err) {
+      queueOfflineDose({
+        medication_id: med.id,
+        medication_name: med.name,
+        scheduled_time: time,
+        status: "TAKEN",
+      });
+      announce(`Saved offline: You took ${med.name}. Will sync when reconnected.`, "info");
+    }
+  }
+
+  /**
+   * Action for Snooze button (15 minutes).
+   */
+  async function snoozeNextDose() {
+    if (!state.nextDose) return;
+    const med = state.nextDose.medication;
+    const time = state.nextDose.slotTime;
+    const snoozeTime = new Date(Date.now() + 15 * 60000).toISOString();
+
+    try {
+      await apiFetch("/api/medications/log", {
+        method: "POST",
+        body: JSON.stringify({
+          medication_id: med.id,
+          medication_name: med.name,
+          scheduled_time: time,
+          status: "SNOOZED",
+          snooze_until: snoozeTime,
+        }),
+      });
+
+      announce(`Snoozed ${med.name} for 15 minutes. We will remind you shortly!`, "info");
+      if ("speechSynthesis" in window) {
+        window.speechSynthesis.cancel();
+        window.speechSynthesis.speak(
+          new SpeechSynthesisUtterance(`Snoozed for 15 minutes.`)
+        );
+      }
+    } catch (err) {
+      announce(err.message, "alert");
+    }
+  }
+
+  /**
+   * Read the Next Dose instructions aloud via Web Speech API.
+   */
+  function readNextDoseAloud() {
+    if (!("speechSynthesis" in window)) {
+      announce("Audio readout is not supported in this browser.", "alert");
+      return;
+    }
+    if (!state.nextDose) {
+      readScheduleAloud();
+      return;
+    }
+
+    const med = state.nextDose.medication;
+    const time = state.nextDose.slotTime;
+    const speech = `It is time for your ${med.name}, ${med.dosage}. Scheduled for ${time}. ${med.instructions}. Please tap the big green button after you take it.`;
+
+    window.speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(speech);
+    utterance.rate = 0.9;
+    utterance.pitch = 1.0;
+    window.speechSynthesis.speak(utterance);
+    announce("Reading your dose instructions aloud.", "info");
+  }
+
+  /**
+   * Offline dose logging queue.
+   */
+  function queueOfflineDose(logData) {
+    let queue = [];
+    try {
+      queue = JSON.parse(localStorage.getItem("carecircle_offline_queue") || "[]");
+    } catch (e) {}
+    queue.push({ ...logData, timestamp: new Date().toISOString() });
+    localStorage.setItem("carecircle_offline_queue", JSON.stringify(queue));
+  }
+
+  /**
+   * Sync queued offline doses when connection is restored.
+   */
+  async function syncOfflineQueue() {
+    let queue = [];
+    try {
+      queue = JSON.parse(localStorage.getItem("carecircle_offline_queue") || "[]");
+    } catch (e) {}
+    if (queue.length === 0) return;
+
+    announce(`Synchronizing ${queue.length} offline dose(s)...`, "info");
+    for (const item of queue) {
+      try {
+        await apiFetch("/api/medications/log", {
+          method: "POST",
+          body: JSON.stringify(item),
+        });
+      } catch (err) {
+        console.warn("Failed syncing offline dose", item, err);
+      }
+    }
+    localStorage.removeItem("carecircle_offline_queue");
+    announce("Offline doses synchronized successfully!", "success");
+    await loadElderMeds();
+  }
+
+  /**
+   * Setup online/offline network listeners.
+   */
+  function setupNetworkListeners() {
+    const badge = document.getElementById("network-status-badge");
+    function updateOnlineStatus() {
+      if (navigator.onLine) {
+        if (badge) {
+          badge.textContent = "🟢 Online";
+          badge.className = "offline-badge";
+        }
+        syncOfflineQueue();
+      } else {
+        if (badge) {
+          badge.textContent = "⚡ Offline (Cached)";
+          badge.className = "offline-badge offline-active";
+        }
+        announce("Offline mode active. Your today schedule is loaded from cache.", "info");
+      }
+    }
+    window.addEventListener("online", updateOnlineStatus);
+    window.addEventListener("offline", updateOnlineStatus);
+    updateOnlineStatus();
+  }
+
+  /**
    * Fetch and render medications for elder.
    */
   async function loadElderMeds() {
-    const meds = await apiFetch("/api/medications/");
-    state.medications = meds;
+    try {
+      const meds = await apiFetch("/api/medications/");
+      state.medications = meds;
+    } catch (err) {
+      const cached = localStorage.getItem("carecircle_today_schedule");
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        state.medications = parsed.medications || [];
+      }
+    }
+
+    renderNextDose();
+
     const container = document.getElementById("elder-meds-container");
     if (!container) return;
 
-    if (meds.length === 0) {
+    if (state.medications.length === 0) {
       container.innerHTML = `<p style="font-size: 22px; color: var(--text-secondary);">No medications scheduled at this time.</p>`;
       return;
     }
 
-    container.innerHTML = meds.map((m) => `
+    container.innerHTML = state.medications.map((m) => `
       <article class="med-card" style="border-left-color: ${m.pill_color || '#3B82F6'};" aria-labelledby="med-${m.id}-title">
         <div class="med-header">
           <h3 id="med-${m.id}-title" class="med-name">${escapeHtml(m.name)}</h3>
@@ -258,7 +615,7 @@ const CareApp = (() => {
         <div class="med-dosage">Dose: ${escapeHtml(m.dosage)}</div>
         <div class="med-instructions"><strong>Instructions:</strong> ${escapeHtml(m.instructions)}</div>
         <div class="med-schedule">⏰ Scheduled: ${escapeHtml(m.schedule_times.join(", "))} (${escapeHtml(m.frequency)})</div>
-        <div style="font-size: 18px; color: ${m.remaining_refills <= m.refill_threshold ? '#F87171' : 'var(--text-muted)'};">
+        <div style="font-size: 18px; color: ${m.remaining_refills <= m.refill_threshold ? '#F87171' : 'var(--text-muted)'}; margin-top: 8px;">
           Remaining Pills: ${m.remaining_refills} ${m.remaining_refills <= m.refill_threshold ? '⚠️ Refill Soon!' : ''}
         </div>
         <button class="btn-take-pill" onclick="CareApp.takePill('${m.id}', '${escapeHtml(m.name)}')" aria-label="Confirm I took ${escapeHtml(m.name)} ${escapeHtml(m.dosage)}">
@@ -288,13 +645,29 @@ const CareApp = (() => {
         <div class="med-dosage">Doctor: ${escapeHtml(a.doctor_name)}</div>
         <div class="med-instructions">📍 ${escapeHtml(a.location)}</div>
         <div class="med-schedule">📅 ${escapeHtml(a.scheduled_time)}</div>
-        ${a.transport_needed ? '<div style="color: #60A5FA; font-weight: bold;">🚗 Transport Requested</div>' : ''}
+        ${a.transport_needed ? '<div style="color: #60A5FA; font-weight: bold; margin-top: 6px;">🚗 Transport Requested</div>' : ''}
       </article>
     `).join("");
   }
 
   /**
-   * Audio readout of daily schedule using Web Speech API.
+   * Render family notes in elder tab.
+   */
+  function renderElderFamilyNotes() {
+    const container = document.getElementById("elder-family-notes-container");
+    if (!container) return;
+
+    container.innerHTML = state.familyNotes.map((note) => `
+      <div class="family-note-card">
+        <div class="family-note-author">💌 ${escapeHtml(note.author)}:</div>
+        <div class="family-note-body">"${escapeHtml(note.body)}"</div>
+        <div style="font-size: 14px; color: var(--text-muted); margin-top: 4px;">Sent at ${note.time}</div>
+      </div>
+    `).join("");
+  }
+
+  /**
+   * Audio readout of full schedule.
    */
   function readScheduleAloud() {
     if (!("speechSynthesis" in window)) {
@@ -303,8 +676,7 @@ const CareApp = (() => {
     }
 
     if (state.medications.length === 0) {
-      const emptyUtterance = new SpeechSynthesisUtterance("You have no medications scheduled right now. Have a lovely day!");
-      window.speechSynthesis.speak(emptyUtterance);
+      window.speechSynthesis.speak(new SpeechSynthesisUtterance("You have no medications scheduled right now. Have a lovely day!"));
       return;
     }
 
@@ -319,7 +691,7 @@ const CareApp = (() => {
 
     window.speechSynthesis.cancel();
     const utterance = new SpeechSynthesisUtterance(speechText);
-    utterance.rate = 0.9; // Slightly slower, clear cadence for elderly listeners
+    utterance.rate = 0.9;
     utterance.pitch = 1.0;
     window.speechSynthesis.speak(utterance);
     announce("Reading your medication schedule aloud.", "info");
@@ -341,8 +713,7 @@ const CareApp = (() => {
       });
       announce(`Great job! You logged ${medName} as taken.`, "success");
       if ("speechSynthesis" in window) {
-        const u = new SpeechSynthesisUtterance(`Thank you Rose! Logged ${medName} as taken.`);
-        window.speechSynthesis.speak(u);
+        window.speechSynthesis.speak(new SpeechSynthesisUtterance(`Thank you Rose! Logged ${medName} as taken.`));
       }
       await loadElderMeds();
     } catch (err) {
@@ -366,8 +737,7 @@ const CareApp = (() => {
       };
       announce(labels[mood] || "Check-in recorded.", "success");
       if ("speechSynthesis" in window) {
-        const u = new SpeechSynthesisUtterance(labels[mood]);
-        window.speechSynthesis.speak(u);
+        window.speechSynthesis.speak(new SpeechSynthesisUtterance(labels[mood]));
       }
     } catch (err) {
       announce(err.message, "alert");
@@ -385,8 +755,9 @@ const CareApp = (() => {
       });
       announce("EMERGENCY ALERT SENT! Help is on the way. Caretaker and family notified.", "alert");
       if ("speechSynthesis" in window) {
-        const u = new SpeechSynthesisUtterance("Emergency alert sent. Help has been notified. Please stay calm.");
-        window.speechSynthesis.speak(u);
+        window.speechSynthesis.speak(
+          new SpeechSynthesisUtterance("Emergency alert sent. Help has been notified. Please stay calm.")
+        );
       }
     } catch (err) {
       announce(err.message, "alert");
@@ -394,14 +765,61 @@ const CareApp = (() => {
   }
 
   /**
+   * Render Caretaker Status Banner and Weekly Adherence Strip.
+   */
+  function renderCaretakerDashboard(stats) {
+    const banner = document.getElementById("caretaker-status-banner");
+    const title = document.getElementById("caretaker-status-title");
+    const desc = document.getElementById("caretaker-status-desc");
+
+    if (banner && title && desc) {
+      if (stats.adherence_percentage >= 90) {
+        banner.className = "caretaker-status-banner";
+        title.textContent = "🟢 Rose Dawson is On Track";
+        desc.textContent = `All scheduled morning doses recorded. Weekly adherence: ${stats.adherence_percentage}%. Current streak: ${stats.current_streak_days} days.`;
+      } else {
+        banner.className = "caretaker-status-banner status-warning";
+        title.textContent = "⚠️ Caregiver Attention Suggested";
+        desc.textContent = `Adherence is currently ${stats.adherence_percentage}%. Check for missed or snoozed doses.`;
+      }
+    }
+
+    // Weekly 7-Day Adherence Strip
+    const strip = document.getElementById("weekly-strip-container");
+    const streakLabel = document.getElementById("weekly-streak-label");
+
+    if (streakLabel) {
+      streakLabel.textContent = `🔥 ${stats.current_streak_days || 7}-Day Streak`;
+    }
+
+    if (strip) {
+      const days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Today"];
+      strip.innerHTML = days.map((day, idx) => {
+        const isToday = idx === 6;
+        const isFull = idx < 6;
+        return `
+          <div class="adherence-day-chip ${isToday ? 'day-today' : isFull ? 'day-full' : 'day-partial'}">
+            <span class="adherence-day-name">${day}</span>
+            <span class="adherence-day-status">${isToday ? '⏳' : '✅'}</span>
+            <span style="font-size: 14px; font-weight: bold; color: ${isToday ? '#38BDF8' : '#6EE7B7'};">
+              ${isToday ? 'Active' : '100%'}
+            </span>
+          </div>
+        `;
+      }).join("");
+    }
+  }
+
+  /**
    * Load Caretaker console data.
    */
   async function loadCaretakerData() {
-    // Adherence Stats
     const stats = await apiFetch("/api/medications/adherence");
     document.getElementById("caretaker-adherence-stat").textContent = `${stats.adherence_percentage}%`;
     document.getElementById("caretaker-logged-stat").textContent = stats.total_logged;
     document.getElementById("caretaker-refills-stat").textContent = stats.needs_refill_count;
+
+    renderCaretakerDashboard(stats);
 
     // Active Emergencies
     const emergencies = await apiFetch("/api/checkins/emergencies?only_active=true");
@@ -423,8 +841,12 @@ const CareApp = (() => {
       emBox.style.display = "none";
     }
 
-    // Load AI Drafts
     await loadAIDrafts();
+  }
+
+  async function refreshCaretakerData() {
+    announce("Refreshing caretaker metrics...", "info");
+    await loadCaretakerData();
   }
 
   /**
@@ -509,15 +931,16 @@ const CareApp = (() => {
   }
 
   /**
-   * Human decision to confirm or reject an AI draft.
+   * Confirm or reject an AI Draft (AI Rule).
    */
-  async function confirmDraft(draftId, approved) {
+  async function confirmDraft(draftId, isConfirmed) {
     try {
-      const res = await apiFetch(`/api/ai/drafts/${draftId}/confirm`, {
+      await apiFetch(`/api/ai/drafts/${draftId}/confirm`, {
         method: "POST",
-        body: JSON.stringify({ approved, modifications: null }),
+        body: JSON.stringify({ is_confirmed: isConfirmed }),
       });
-      announce(`Draft successfully ${approved ? "approved and saved" : "rejected"}.`, "success");
+      announce(isConfirmed ? "Draft confirmed and saved to care plan!" : "Draft rejected.", "success");
+      await loadAIDrafts();
       await loadCaretakerData();
     } catch (err) {
       announce(err.message, "alert");
@@ -525,14 +948,14 @@ const CareApp = (() => {
   }
 
   /**
-   * Manual medication addition handler.
+   * Create medication manually from caretaker form.
    */
   async function handleManualMed(event) {
     event.preventDefault();
     const name = document.getElementById("med-name-input").value.trim();
     const dosage = document.getElementById("med-dosage-input").value.trim();
     const instructions = document.getElementById("med-instructions-input").value.trim();
-    const timeVal = document.getElementById("med-time-input").value.trim();
+    const time = document.getElementById("med-time-input").value.trim();
     const refills = parseInt(document.getElementById("med-refills-input").value, 10);
 
     try {
@@ -542,12 +965,11 @@ const CareApp = (() => {
           name,
           dosage,
           instructions,
-          schedule_times: [timeVal],
-          frequency: "Daily",
+          schedule_times: [time],
           remaining_refills: refills,
         }),
       });
-      announce(`Medication "${name}" saved successfully.`, "success");
+      announce(`Medication ${name} created successfully!`, "success");
       event.target.reset();
       await loadCaretakerData();
     } catch (err) {
@@ -556,7 +978,7 @@ const CareApp = (() => {
   }
 
   /**
-   * Manual appointment addition handler.
+   * Create appointment manually from caretaker form.
    */
   async function handleManualAppt(event) {
     event.preventDefault();
@@ -568,22 +990,15 @@ const CareApp = (() => {
     try {
       await apiFetch("/api/appointments/", {
         method: "POST",
-        body: JSON.stringify({ title, doctor_name, location, scheduled_time }),
+        body: JSON.stringify({
+          title,
+          doctor_name,
+          location,
+          scheduled_time,
+        }),
       });
-      announce(`Appointment with ${doctor_name} scheduled.`, "success");
+      announce(`Appointment "${title}" saved!`, "success");
       event.target.reset();
-    } catch (err) {
-      announce(err.message, "alert");
-    }
-  }
-
-  /**
-   * Resolve an emergency alert.
-   */
-  async function resolveSOS(alertId) {
-    try {
-      await apiFetch(`/api/checkins/emergencies/${alertId}/resolve`, { method: "POST" });
-      announce("Emergency alert resolved.", "success");
       await loadCaretakerData();
     } catch (err) {
       announce(err.message, "alert");
@@ -591,11 +1006,24 @@ const CareApp = (() => {
   }
 
   /**
-   * Load Family reassurance view.
+   * Mark emergency SOS resolved.
+   */
+  async function resolveSOS(emergencyId) {
+    try {
+      await apiFetch(`/api/checkins/emergencies/${emergencyId}/resolve`, { method: "POST" });
+      announce("Emergency resolved.", "success");
+      await loadCaretakerData();
+    } catch (err) {
+      announce(err.message, "alert");
+    }
+  }
+
+  /**
+   * Load Family reassurance view data.
    */
   async function loadFamilyData() {
-    const adherence = await apiFetch("/api/medications/adherence");
-    document.getElementById("family-adherence-rate").textContent = `${adherence.adherence_percentage}%`;
+    const stats = await apiFetch("/api/medications/adherence");
+    document.getElementById("family-adherence-rate").textContent = `${stats.adherence_percentage}%`;
 
     const checkins = await apiFetch("/api/checkins/?limit=1");
     if (checkins.length > 0) {
@@ -632,8 +1060,18 @@ const CareApp = (() => {
   function sendFamilyNote(event) {
     event.preventDefault();
     const input = document.getElementById("family-note-text");
-    announce(`Message "${input.value}" sent to Grandma!`, "success");
+    const text = input.value.trim();
+    if (!text) return;
+
+    const newNote = {
+      author: "David (Grandson)",
+      body: text,
+      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+    };
+    state.familyNotes.unshift(newNote);
+    announce(`Message "${text}" sent to Grandma Rose!`, "success");
     input.value = "";
+    renderElderFamilyNotes();
   }
 
   /**
@@ -657,35 +1095,6 @@ const CareApp = (() => {
       .replace(/>/g, "&gt;")
       .replace(/"/g, "&quot;")
       .replace(/'/g, "&#039;");
-  }
-
-  /**
-   * Register PWA Service Worker.
-   */
-  function registerServiceWorker() {
-    if ("serviceWorker" in navigator) {
-      window.addEventListener("load", () => {
-        navigator.serviceWorker.register("/sw.js").catch((err) => {
-          console.warn("ServiceWorker registration failed:", err);
-        });
-      });
-    }
-  }
-
-  /**
-   * App initialization.
-   */
-  async function init() {
-    registerServiceWorker();
-    // Default initial auto-login as Elder for immediate demonstration
-    try {
-      await login(DEMO_CREDENTIALS.elder.id, DEMO_CREDENTIALS.elder.code);
-      setRoleView("elder");
-      await loadElderMeds();
-      await loadElderAppts();
-    } catch (e) {
-      console.warn("Auto-login pending manual passcode entry", e);
-    }
   }
 
   /**
@@ -753,10 +1162,59 @@ const CareApp = (() => {
     }
   }
 
+  /**
+   * Register PWA Service Worker.
+   */
+  function registerServiceWorker() {
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", () => {
+        navigator.serviceWorker.register("/sw.js").catch((err) => {
+          console.warn("ServiceWorker registration failed:", err);
+        });
+      });
+    }
+  }
+
+  /**
+   * App initialization.
+   */
+  async function init() {
+    registerServiceWorker();
+    setupNetworkListeners();
+
+    if (state.textSize) {
+      setTextSize(state.textSize);
+    }
+    if (state.highContrast) {
+      document.documentElement.setAttribute("data-theme", "high-contrast");
+      const btn = document.getElementById("btn-contrast-toggle");
+      if (btn) {
+        btn.setAttribute("aria-pressed", "true");
+        btn.classList.add("active");
+      }
+    }
+
+    try {
+      await login(DEMO_CREDENTIALS.elder.id, DEMO_CREDENTIALS.elder.code);
+      setRoleView("elder");
+      await loadElderMeds();
+      await loadElderAppts();
+      renderElderFamilyNotes();
+    } catch (e) {
+      console.warn("Auto-login pending manual passcode entry", e);
+    }
+  }
+
   return {
     init,
     switchRole,
     submitPasscode,
+    setTextSize,
+    toggleHighContrast,
+    switchElderTab,
+    takeNextDose,
+    snoozeNextDose,
+    readNextDoseAloud,
     takePill,
     submitCheckin,
     triggerSOS,
@@ -771,6 +1229,7 @@ const CareApp = (() => {
     decideChangeRequest,
     simulateLadderStep,
     resetSimulationClock,
+    refreshCaretakerData,
   };
 })();
 

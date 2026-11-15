@@ -26,8 +26,25 @@
         <span>CareCircle</span>
       </a>
 
+      <!-- Accessibility Toolbar: Senior Text Scaling & High Contrast -->
+      <div class="a11y-toolbar" role="region" aria-label="Text Size and Contrast Options">
+        <button type="button" class="a11y-btn active" id="btn-text-normal" onclick="CareApp.setTextSize('normal')" aria-pressed="true" aria-label="Normal 22px text size">
+          A
+        </button>
+        <button type="button" class="a11y-btn" id="btn-text-large" onclick="CareApp.setTextSize('large')" aria-pressed="false" aria-label="Large 26px text size">
+          A+
+        </button>
+        <button type="button" class="a11y-btn" id="btn-text-xlarge" onclick="CareApp.setTextSize('xlarge')" aria-pressed="false" aria-label="Extra Large 30px text size">
+          A++
+        </button>
+        <button type="button" class="a11y-btn" id="btn-contrast-toggle" onclick="CareApp.toggleHighContrast()" aria-pressed="false" aria-label="Toggle high contrast black and yellow mode">
+          🌓 High Contrast
+        </button>
+        <span id="network-status-badge" class="offline-badge" role="status">🟢 Online</span>
+      </div>
+
       <nav aria-label="Role and Profile Switcher" class="role-switcher">
-        <label id="role-selector-label" for="elder-tab">View Mode:</label>
+        <label id="role-selector-label" for="elder-tab">View:</label>
         <button id="elder-tab" class="role-btn active" aria-pressed="true" onclick="CareApp.switchRole('elder')">
           👵 Elder
         </button>
@@ -61,63 +78,142 @@
         </button>
       </div>
 
-      <!-- Personalized Greeting & Audio Readout -->
+      <!-- Personalized Greeting Banner -->
       <article class="greeting-banner">
         <div class="greeting-title" id="elder-greeting">Good day, Rose!</div>
         <p style="font-size: 22px; color: var(--text-secondary); margin-top: 8px;">
-          Here is your medication plan for today. You are doing wonderful!
+          You are doing wonderful. Everything is organized and safe for you.
         </p>
-        <button class="readout-btn" onclick="CareApp.readScheduleAloud()" aria-label="Read my medication schedule aloud using speech audio">
-          🔊 Read My Schedule Aloud
-        </button>
       </article>
 
-      <!-- Elder Plain-Language Consent Card (Pending Caregiver ChangeRequests) -->
-      <section id="elder-consent-section" class="card-box" style="display: none; border: 3px solid #F59E0B; background: #1C1917;" aria-labelledby="consent-heading">
-        <h2 id="consent-heading" style="color: #FDE68A; font-size: 26px; display: flex; align-items: center; gap: 8px;">
-          ✋ Care Plan Change Pending Your Approval
-        </h2>
-        <p style="font-size: 20px; color: #FEF3C7; margin-top: 4px;">
-          Your caregiver proposed a change. Nothing changes unless you approve it.
-        </p>
-        <div id="elder-consent-container" style="margin-top: 16px;"></div>
-      </section>
+      <!-- TAB 1: TODAY (Focused exclusively on the NEXT DOSE) -->
+      <div id="elder-tab-today" class="elder-tab-content active" role="tabpanel" aria-labelledby="bottom-tab-today">
+        <!-- Hero Next Dose Card -->
+        <article id="hero-next-dose-card" class="hero-dose-card" aria-labelledby="hero-dose-title">
+          <div id="hero-dose-badge" class="hero-dose-time-badge">
+            ⏰ Next Scheduled Dose
+          </div>
 
-      <!-- Daily Wellness Check-In -->
-      <section class="checkin-section" aria-labelledby="checkin-heading">
-        <h2 id="checkin-heading" class="section-title">How are you feeling right now?</h2>
-        <p style="color: var(--text-secondary); font-size: 20px;">Tap one button to let your loved ones know:</p>
-        <div class="checkin-options">
-          <button class="btn-mood btn-mood-great" onclick="CareApp.submitCheckin('GREAT')" aria-label="I feel Great today">
-            <span style="font-size: 32px;" aria-hidden="true">😊</span>
-            <span>I Feel Great!</span>
-          </button>
-          <button class="btn-mood btn-mood-okay" onclick="CareApp.submitCheckin('OKAY')" aria-label="I feel Okay today">
-            <span style="font-size: 32px;" aria-hidden="true">😐</span>
-            <span>I Feel Okay</span>
-          </button>
-          <button class="btn-mood btn-mood-help" onclick="CareApp.submitCheckin('NEED_HELP')" aria-label="I Need A Check-In or Help">
-            <span style="font-size: 32px;" aria-hidden="true">🙋</span>
-            <span>Need A Check-In</span>
-          </button>
-        </div>
-      </section>
+          <h2 id="hero-dose-title" class="hero-dose-title">Loading next dose...</h2>
+          <div id="hero-dose-dosage" class="hero-dose-dosage">--</div>
 
-      <!-- Elder Medications List -->
-      <section aria-labelledby="elder-meds-heading">
-        <h2 id="elder-meds-heading" class="section-title">Your Medications</h2>
-        <div id="elder-meds-container" class="meds-grid">
-          <!-- Dynamically populated medication cards -->
-        </div>
-      </section>
+          <div id="hero-dose-instructions" class="hero-dose-instructions">
+            Checking your schedule...
+          </div>
 
-      <!-- Upcoming Appointments -->
-      <section aria-labelledby="elder-appts-heading">
-        <h2 id="elder-appts-heading" class="section-title">Your Doctor Visits</h2>
-        <div id="elder-appts-container" class="meds-grid">
-          <!-- Dynamically populated appointments -->
-        </div>
-      </section>
+          <div class="hero-meta-row" id="hero-meta-row">
+            <span id="hero-pill-color" class="hero-pill-indicator">💊 Blue Oval Pill</span>
+            <span id="hero-refills-left" class="hero-pill-indicator">📦 28 refills left</span>
+          </div>
+
+          <!-- Hero Actions: Huge "I took it" button, Large Snooze button, Read Aloud -->
+          <div class="hero-actions-container">
+            <button id="btn-huge-take" class="btn-huge-take" onclick="CareApp.takeNextDose()" aria-label="Confirm dose taken: I took this medication">
+              <span style="font-size: 34px;" aria-hidden="true">✅</span>
+              <span>I TOOK IT</span>
+            </button>
+
+            <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+              <button id="btn-snooze-hero" class="btn-snooze-large" style="flex: 1;" onclick="CareApp.snoozeNextDose()" aria-label="Snooze this reminder for 15 minutes">
+                ⏰ Snooze 15 Min
+              </button>
+              <button id="btn-readout-hero" class="btn-readout-hero" style="flex: 1;" onclick="CareApp.readNextDoseAloud()" aria-label="Read this medication instructions aloud">
+                🔊 Read Aloud
+              </button>
+            </div>
+          </div>
+        </article>
+
+        <!-- Container for when all doses for today are done -->
+        <article id="hero-all-done-card" class="hero-completed-card" style="display: none;">
+          <h2>🎉 All Doses Taken Today!</h2>
+          <p>You have taken all your scheduled medicines for today. Rest well!</p>
+        </article>
+
+        <!-- Elder Plain-Language Consent Card (Pending Caregiver ChangeRequests) -->
+        <section id="elder-consent-section" class="card-box" style="display: none; border: 3px solid #F59E0B; background: #1C1917;" aria-labelledby="consent-heading">
+          <h2 id="consent-heading" style="color: #FDE68A; font-size: 26px; display: flex; align-items: center; gap: 8px;">
+            ✋ Care Plan Change Pending Your Approval
+          </h2>
+          <p style="font-size: 20px; color: #FEF3C7; margin-top: 4px;">
+            Your caregiver proposed a change. Nothing changes unless you approve it.
+          </p>
+          <div id="elder-consent-container" style="margin-top: 16px;"></div>
+        </section>
+
+        <!-- Daily Wellness Check-In -->
+        <section class="checkin-section" aria-labelledby="checkin-heading">
+          <h2 id="checkin-heading" class="section-title">How are you feeling right now?</h2>
+          <p style="color: var(--text-secondary); font-size: 20px;">Tap one button to let your loved ones know:</p>
+          <div class="checkin-options">
+            <button class="btn-mood btn-mood-great" onclick="CareApp.submitCheckin('GREAT')" aria-label="I feel Great today">
+              <span style="font-size: 32px;" aria-hidden="true">😊</span>
+              <span>I Feel Great!</span>
+            </button>
+            <button class="btn-mood btn-mood-okay" onclick="CareApp.submitCheckin('OKAY')" aria-label="I feel Okay today">
+              <span style="font-size: 32px;" aria-hidden="true">😐</span>
+              <span>I Feel Okay</span>
+            </button>
+            <button class="btn-mood btn-mood-help" onclick="CareApp.submitCheckin('NEED_HELP')" aria-label="I Need A Check-In or Help">
+              <span style="font-size: 32px;" aria-hidden="true">🙋</span>
+              <span>Need A Check-In</span>
+            </button>
+          </div>
+        </section>
+      </div>
+
+      <!-- TAB 2: MEDICINES (All prescribed medications) -->
+      <div id="elder-tab-medicines" class="elder-tab-content" role="tabpanel" aria-labelledby="bottom-tab-meds">
+        <section aria-labelledby="elder-meds-heading">
+          <h2 id="elder-meds-heading" class="section-title">All Prescribed Medications</h2>
+          <div id="elder-meds-container" class="meds-grid">
+            <!-- Dynamically populated medication cards -->
+          </div>
+        </section>
+      </div>
+
+      <!-- TAB 3: APPOINTMENTS (Doctor visits) -->
+      <div id="elder-tab-appointments" class="elder-tab-content" role="tabpanel" aria-labelledby="bottom-tab-appts">
+        <section aria-labelledby="elder-appts-heading">
+          <h2 id="elder-appts-heading" class="section-title">Your Doctor Visits &amp; Appointments</h2>
+          <div id="elder-appts-container" class="meds-grid">
+            <!-- Dynamically populated appointments -->
+          </div>
+        </section>
+      </div>
+
+      <!-- TAB 4: FAMILY (Loving notes & reassuring messages) -->
+      <div id="elder-tab-family" class="elder-tab-content" role="tabpanel" aria-labelledby="bottom-tab-family">
+        <section aria-labelledby="elder-family-heading">
+          <h2 id="elder-family-heading" class="section-title">Messages from Your Family</h2>
+          <div id="elder-family-notes-container">
+            <div class="family-note-card">
+              <div class="family-note-author">💌 David (Grandson):</div>
+              <div class="family-note-body">"Thinking of you Grandma! Can't wait to visit this Sunday for tea."</div>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <!-- 4-ITEM ELDER BOTTOM NAVIGATION BAR -->
+      <nav class="elder-bottom-nav" id="elder-bottom-nav" aria-label="Senior Bottom Navigation">
+        <button type="button" class="bottom-nav-item active" id="bottom-tab-today" onclick="CareApp.switchElderTab('today')" aria-selected="true" role="tab">
+          <span class="nav-icon" aria-hidden="true">📅</span>
+          <span>Today</span>
+        </button>
+        <button type="button" class="bottom-nav-item" id="bottom-tab-meds" onclick="CareApp.switchElderTab('medicines')" aria-selected="false" role="tab">
+          <span class="nav-icon" aria-hidden="true">💊</span>
+          <span>Medicines</span>
+        </button>
+        <button type="button" class="bottom-nav-item" id="bottom-tab-appts" onclick="CareApp.switchElderTab('appointments')" aria-selected="false" role="tab">
+          <span class="nav-icon" aria-hidden="true">🩺</span>
+          <span>Visits</span>
+        </button>
+        <button type="button" class="bottom-nav-item" id="bottom-tab-family" onclick="CareApp.switchElderTab('family')" aria-selected="false" role="tab">
+          <span class="nav-icon" aria-hidden="true">❤️</span>
+          <span>Family</span>
+        </button>
+      </nav>
     </section>
 
     <!-- ========================================== -->
@@ -125,6 +221,30 @@
     <!-- ========================================== -->
     <section id="caretaker-view" class="caretaker-view" style="display: none;" aria-labelledby="caretaker-heading">
       <h1 id="caretaker-heading" class="section-title">Caretaker Clinical Console</h1>
+
+      <!-- Status Banner -->
+      <aside id="caretaker-status-banner" class="caretaker-status-banner" role="status" aria-label="Elder Live Status">
+        <div>
+          <div class="status-banner-title" id="caretaker-status-title">🟢 Rose Dawson is On Track</div>
+          <div class="status-banner-desc" id="caretaker-status-desc">All scheduled morning doses recorded. Next scheduled dose: Metformin at 08:00.</div>
+        </div>
+        <button type="button" class="btn-secondary" style="color: #FFFFFF; border-color: #A7F3D0;" onclick="CareApp.refreshCaretakerData()">
+          🔄 Refresh Status
+        </button>
+      </aside>
+
+      <!-- Weekly Adherence Strip -->
+      <section id="caretaker-weekly-adherence" class="weekly-adherence-strip" aria-labelledby="weekly-adh-heading">
+        <div class="adherence-strip-header">
+          <h2 id="weekly-adh-heading" style="font-size: 24px; color: #FFFFFF;">📊 7-Day Adherence Strip</h2>
+          <div style="font-size: 20px; font-weight: 700; color: #34D399;" id="weekly-streak-label">
+            🔥 7-Day Streak
+          </div>
+        </div>
+        <div class="adherence-strip-days" id="weekly-strip-container">
+          <!-- Populated by CareApp.renderWeeklyAdherenceStrip() -->
+        </div>
+      </section>
 
       <!-- Active Emergencies Alert Feed -->
       <div id="caretaker-emergencies-box" class="card-box" style="display: none; border-color: #EF4444; background: #450A0A;">
